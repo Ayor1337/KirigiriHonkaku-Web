@@ -14,16 +14,16 @@ export function ItemList({ items, onSelectItem }: ItemListProps) {
           key={item.id}
           className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
             item.isInvestigated
-              ? 'bg-[var(--bg-tertiary)] border-[var(--border-color)] opacity-70'
-              : 'bg-[var(--bg-secondary)] border-[var(--border-color)] hover:border-[var(--accent-primary)]'
+              ? 'bg-(--bg-tertiary) border-(--border-color) opacity-70'
+              : 'bg-(--bg-secondary) border-(--border-color) hover:border-(--accent-primary)'
           }`}
           onClick={() => onSelectItem(item)}
         >
           {/* 物品图标 */}
-          <div className="w-10 h-10 rounded bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded bg-(--bg-primary) border border-(--border-color) flex items-center justify-center flex-shrink-0">
             <svg
               viewBox="0 0 24 24"
-              className="w-5 h-5 text-[var(--text-muted)]"
+              className="w-5 h-5 text-(--text-muted)"
               fill="none"
               stroke="currentColor"
               strokeWidth="1.5"
@@ -35,17 +35,17 @@ export function ItemList({ items, onSelectItem }: ItemListProps) {
 
           <div className="flex-1 min-w-0">
             <div className={`font-medium truncate ${
-              item.isInvestigated ? 'text-[var(--text-muted)]' : 'text-[var(--text-primary)]'
+              item.isInvestigated ? 'text-(--text-muted)' : 'text-(--text-primary)'
             }`}>
               {item.name}
             </div>
-            <div className="text-xs text-[var(--text-muted)] truncate">
+            <div className="text-xs text-(--text-muted) truncate">
               {item.description}
             </div>
           </div>
 
           {item.isInvestigated && (
-            <span className="text-xs text-[var(--success)] px-2 py-0.5 bg-[var(--bg-primary)] rounded">
+            <span className="text-xs text-[var(--success)] px-2 py-0.5 bg-(--bg-primary) rounded">
               已调查
             </span>
           )}

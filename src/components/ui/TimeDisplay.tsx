@@ -21,14 +21,14 @@ export function TimeDisplay({ date, timePeriod, weather }: TimeDisplayProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="font-mono text-lg text-[var(--text-primary)] tracking-wider">
+      <div className="font-mono text-lg text-(--text-primary) tracking-wider">
         {formatDate(date)}
       </div>
-      <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+      <div className="flex items-center gap-2 text-sm text-(--text-secondary)">
         <span>{formatTime(date)}</span>
-        <span className="text-[var(--border-color)]">|</span>
+        <span className="text-(--border-color)">|</span>
         <span>{timePeriod}</span>
-        <span className="text-[var(--border-color)]">|</span>
+        <span className="text-(--border-color)">|</span>
         <span>{weather}</span>
       </div>
     </div>

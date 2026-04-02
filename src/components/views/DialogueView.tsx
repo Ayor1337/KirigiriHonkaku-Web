@@ -40,16 +40,16 @@ export function DialogueView({ npc, onBack }: DialogueViewProps) {
   return (
     <div className="h-full flex flex-col">
       {/* 对话头部 */}
-      <header className="p-6 border-b border-[var(--border-color)] flex items-center justify-between">
+      <header className="p-6 border-b border-(--border-color) flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-full bg-[var(--bg-secondary)] border border-[var(--border-color)] flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-8 h-8 text-[var(--text-muted)]" fill="currentColor">
+          <div className="w-14 h-14 rounded-full bg-(--bg-secondary) border border-(--border-color) flex items-center justify-center">
+            <svg viewBox="0 0 24 24" className="w-8 h-8 text-(--text-muted)" fill="currentColor">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
           </div>
           <div>
-            <h2 className="font-heading text-2xl text-[var(--text-primary)]">{npc.name}</h2>
-            <span className="text-sm text-[var(--text-muted)]">{npc.title}</span>
+            <h2 className="font-heading text-2xl text-(--text-primary)">{npc.name}</h2>
+            <span className="text-sm text-(--text-muted)">{npc.title}</span>
           </div>
         </div>
         <InkButton variant="ghost" size="sm" onClick={onBack}>
@@ -69,8 +69,8 @@ export function DialogueView({ npc, onBack }: DialogueViewProps) {
               <div
                 className={`max-w-[80%] p-4 rounded-lg ${
                   isPlayer
-                    ? 'bg-[var(--accent-primary)] text-white'
-                    : 'bg-[var(--bg-secondary)] text-[var(--text-primary)]'
+                    ? 'bg-(--accent-primary) text-white'
+                    : 'bg-(--bg-secondary) text-(--text-primary)'
                 }`}
               >
                 <p className="leading-relaxed">{line.replace(/^(你问：|.+回答：)/, '')}</p>
@@ -81,8 +81,8 @@ export function DialogueView({ npc, onBack }: DialogueViewProps) {
       </div>
 
       {/* 话题选项 */}
-      <div className="p-6 border-t border-[var(--border-color)] bg-[var(--bg-secondary)]">
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">
+      <div className="p-6 border-t border-(--border-color) bg-(--bg-secondary)">
+        <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3">
           可追问的话题
         </h3>
         <div className="flex flex-wrap gap-2">

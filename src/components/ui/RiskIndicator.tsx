@@ -86,7 +86,7 @@ export function RiskIndicator({ level }: RiskIndicatorProps) {
 
       {/* 数值显示 */}
       <div className="flex flex-col">
-        <span className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
+        <span className="text-xs text-(--text-muted) uppercase tracking-wider">
           暴露度
         </span>
         <span

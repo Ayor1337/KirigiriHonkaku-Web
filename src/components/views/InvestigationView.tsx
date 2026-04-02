@@ -18,19 +18,19 @@ export function InvestigationView({
     <div className="h-full overflow-y-auto p-6 space-y-8">
       {/* 地点标题 */}
       <header>
-        <h1 className="font-heading text-3xl text-[var(--text-primary)] mb-2">
+        <h1 className="font-heading text-3xl text-(--text-primary) mb-2">
           {gameState.currentLocation.name}
         </h1>
-        <div className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+        <div className="flex items-center gap-3 text-sm text-(--text-secondary)">
           <span>{gameState.timePeriod}</span>
-          <span className="text-[var(--border-color)]">·</span>
+          <span className="text-(--border-color)">·</span>
           <span>{gameState.weather}</span>
         </div>
       </header>
 
       {/* 场景描述 */}
       <section className="prose prose-invert max-w-none">
-        <p className="text-lg text-[var(--text-primary)] leading-relaxed">
+        <p className="text-lg text-(--text-primary) leading-relaxed">
           {gameState.currentLocation.description}
         </p>
       </section>
@@ -38,7 +38,7 @@ export function InvestigationView({
       {/* 在场人物摘要 */}
       {gameState.presentNPCs.length > 0 && (
         <section>
-          <h2 className="font-heading text-xl text-[var(--accent-primary)] mb-4">
+          <h2 className="font-heading text-xl text-(--accent-primary) mb-4">
             在场人物
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -46,16 +46,16 @@ export function InvestigationView({
               <div
                 key={npc.id}
                 onClick={() => onSelectNPC(npc)}
-                className="flex items-center gap-3 p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg cursor-pointer hover:border-[var(--accent-primary)] transition-colors"
+                className="flex items-center gap-3 p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg cursor-pointer hover:border-(--accent-primary) transition-colors"
               >
-                <div className="w-12 h-12 rounded-full bg-[var(--bg-primary)] border border-[var(--border-color)] flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-[var(--text-muted)]" fill="currentColor">
+                <div className="w-12 h-12 rounded-full bg-(--bg-primary) border border-(--border-color) flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" className="w-6 h-6 text-(--text-muted)" fill="currentColor">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                   </svg>
                 </div>
                 <div>
-                  <div className="font-medium text-[var(--text-primary)]">{npc.name}</div>
-                  <div className="text-sm text-[var(--text-muted)]">{npc.title}</div>
+                  <div className="font-medium text-(--text-primary)">{npc.name}</div>
+                  <div className="text-sm text-(--text-muted)">{npc.title}</div>
                 </div>
               </div>
             ))}
@@ -66,7 +66,7 @@ export function InvestigationView({
       {/* 可调查物品摘要 */}
       {uninvestigatedItems.length > 0 && (
         <section>
-          <h2 className="font-heading text-xl text-[var(--accent-primary)] mb-4">
+          <h2 className="font-heading text-xl text-(--accent-primary) mb-4">
             值得关注的物品
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -74,16 +74,16 @@ export function InvestigationView({
               <div
                 key={item.id}
                 onClick={() => onSelectItem(item)}
-                className="p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg cursor-pointer hover:border-[var(--accent-primary)] transition-colors"
+                className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg cursor-pointer hover:border-(--accent-primary) transition-colors"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <svg viewBox="0 0 24 24" className="w-5 h-5 text-[var(--accent-primary)]" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 text-(--accent-primary)" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="3" y="3" width="18" height="18" rx="2" />
                     <circle cx="12" cy="12" r="4" />
                   </svg>
-                  <span className="font-medium text-[var(--text-primary)]">{item.name}</span>
+                  <span className="font-medium text-(--text-primary)">{item.name}</span>
                 </div>
-                <p className="text-sm text-[var(--text-secondary)]">
+                <p className="text-sm text-(--text-secondary)">
                   {item.description}
                 </p>
               </div>
@@ -93,11 +93,11 @@ export function InvestigationView({
       )}
 
       {/* 局势提示 */}
-      <section className="p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg">
-        <h3 className="text-sm font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
+      <section className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg">
+        <h3 className="text-sm font-medium text-(--text-muted) uppercase tracking-wider mb-2">
           当前局势
         </h3>
-        <p className="text-[var(--text-primary)]">
+        <p className="text-(--text-primary)">
           {gameState.situation}
         </p>
       </section>

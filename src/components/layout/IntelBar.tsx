@@ -18,16 +18,16 @@ export function IntelBar({
   ];
 
   return (
-    <nav className="h-[50px] bg-[var(--bg-secondary)] border-t border-[var(--border-color)] px-6 flex items-center justify-center gap-4 flex-shrink-0">
+    <nav className="h-12.5 bg-(--bg-secondary) border-t border-(--border-color) px-6 flex items-center justify-center gap-4 shrink-0">
       {navItems.map((item) => (
         <button
           key={item.id}
-          className="relative flex items-center gap-2 px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded-md hover:bg-[var(--bg-tertiary)]"
+          className="relative flex items-center gap-2 px-4 py-2 text-sm text-(--text-secondary) hover:text-(--text-primary) transition-colors rounded-md hover:bg-(--bg-tertiary)"
         >
           <span>{item.icon}</span>
           <span>{item.label}</span>
           {item.badge !== undefined && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs bg-[var(--accent-primary)] text-white rounded-full">
+            <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs bg-(--accent-primary) text-white rounded-full">
               {item.badge}
             </span>
           )}

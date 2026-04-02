@@ -34,7 +34,7 @@ export function MainStage({
   onFeedbackComplete,
 }: MainStageProps) {
   return (
-    <main className="h-full bg-[var(--bg-primary)] overflow-hidden">
+    <main className="h-full bg-(--bg-primary) overflow-hidden">
       {viewState === 'investigation' && (
         <InvestigationView
           gameState={gameState}

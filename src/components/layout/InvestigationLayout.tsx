@@ -52,7 +52,7 @@ export function InvestigationLayout() {
   };
 
   return (
-    <div className="investigation-layout h-screen flex flex-col bg-[var(--bg-primary)]">
+    <div className="investigation-layout h-screen flex flex-col bg-(--bg-primary)">
       {/* 顶部栏 */}
       <TopBar gameState={gameState} />
 

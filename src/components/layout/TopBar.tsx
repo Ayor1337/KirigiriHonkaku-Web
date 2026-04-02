@@ -9,7 +9,7 @@ interface TopBarProps {
 
 export function TopBar({ gameState }: TopBarProps) {
   return (
-    <header className="h-[60px] bg-[var(--bg-secondary)] border-b border-[var(--border-color)] px-6 flex items-center justify-between flex-shrink-0">
+    <header className="h-15 bg-(--bg-secondary) border-b border-(--border-color) px-6 flex items-center justify-between shrink-0">
       {/* 左侧：时间 */}
       <TimeDisplay
         date={gameState.currentTime}
@@ -19,7 +19,7 @@ export function TopBar({ gameState }: TopBarProps) {
 
       {/* 中间：局势提示 */}
       <div className="hidden md:flex items-center max-w-md px-6">
-        <span className="text-sm text-[var(--text-secondary)] text-center line-clamp-1">
+        <span className="text-sm text-(--text-secondary) text-center line-clamp-1">
           {gameState.situation}
         </span>
       </div>

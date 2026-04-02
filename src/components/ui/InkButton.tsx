@@ -43,7 +43,7 @@ export function InkButton({
     >
       {/* 墨水扩散背景 */}
       <span
-        className="absolute inset-0 bg-[var(--accent-primary)] opacity-0 transition-opacity duration-300 group-hover:opacity-10"
+        className="absolute inset-0 bg-(--accent-primary) opacity-0 transition-opacity duration-300 group-hover:opacity-10"
         style={{
           transform: 'scale(0)',
           borderRadius: '50%',

@@ -20,18 +20,18 @@ export function ActionColumn({
   activeNPCId,
 }: ActionColumnProps) {
   return (
-    <aside className="h-full bg-[var(--bg-primary)] border-r border-[var(--border-color)] overflow-y-auto p-4 space-y-6">
+    <aside className="h-full bg-(--bg-primary) border-r border-(--border-color) overflow-y-auto p-4 space-y-6">
       {/* 当前地点卡 */}
       <section>
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+        <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-(--accent-primary)" />
           当前地点
         </h3>
-        <div className="p-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg">
-          <h4 className="font-heading text-base text-[var(--text-primary)] mb-1">
+        <div className="p-3 bg-(--bg-secondary) border border-(--border-color) rounded-lg">
+          <h4 className="font-heading text-base text-(--text-primary) mb-1">
             {gameState.currentLocation.name}
           </h4>
-          <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
+          <p className="text-xs text-(--text-secondary) line-clamp-2">
             {gameState.currentLocation.description.slice(0, 60)}...
           </p>
         </div>
@@ -39,8 +39,8 @@ export function ActionColumn({
 
       {/* 可前往地点 */}
       <section>
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+        <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-(--accent-primary)" />
           前往地点
         </h3>
         <div className="space-y-2">
@@ -60,8 +60,8 @@ export function ActionColumn({
 
       {/* 可询问NPC */}
       <section>
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+        <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-(--accent-primary)" />
           询问对象
         </h3>
         <NPCList
@@ -73,8 +73,8 @@ export function ActionColumn({
 
       {/* 可调查物品 */}
       <section>
-        <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)]" />
+        <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-(--accent-primary)" />
           调查物品
         </h3>
         <ItemList

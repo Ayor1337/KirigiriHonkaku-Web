@@ -28,17 +28,17 @@ export function FeedbackView({ item, result, onComplete }: FeedbackViewProps) {
     <div className="h-full overflow-y-auto p-6 space-y-6">
       {/* 标题 */}
       <header>
-        <h2 className="text-sm text-[var(--text-muted)] uppercase tracking-wider mb-2">
+        <h2 className="text-sm text-(--text-muted) uppercase tracking-wider mb-2">
           调查结果
         </h2>
-        <h1 className="font-heading text-2xl text-[var(--text-primary)]">
+        <h1 className="font-heading text-2xl text-(--text-primary)">
           {item.name}
         </h1>
       </header>
 
       {/* 调查结果描述 */}
-      <section className="p-6 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg">
-        <p className="text-lg text-[var(--text-primary)] leading-relaxed">
+      <section className="p-6 bg-(--bg-secondary) border border-(--border-color) rounded-lg">
+        <p className="text-lg text-(--text-primary) leading-relaxed">
           {result.description}
         </p>
       </section>
@@ -46,9 +46,9 @@ export function FeedbackView({ item, result, onComplete }: FeedbackViewProps) {
       {/* 发现的线索 */}
       {result.cluesFound.length > 0 && (
         <section>
-          <h3 className="font-heading text-xl text-[var(--accent-primary)] mb-4 flex items-center gap-2">
+          <h3 className="font-heading text-xl text-(--accent-primary) mb-4 flex items-center gap-2">
             <span>发现的线索</span>
-            <span className="text-sm px-2 py-0.5 bg-[var(--accent-primary)] text-white rounded">
+            <span className="text-sm px-2 py-0.5 bg-(--accent-primary) text-white rounded">
               {result.cluesFound.length}
             </span>
           </h3>
@@ -71,24 +71,24 @@ export function FeedbackView({ item, result, onComplete }: FeedbackViewProps) {
 
       {/* 状态变化 */}
       <section className="space-y-3">
-        <h3 className="font-heading text-lg text-[var(--text-primary)]">
+        <h3 className="font-heading text-lg text-(--text-primary)">
           状态变化
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* 时间推进 */}
-          <div className="p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg">
-            <div className="text-sm text-[var(--text-muted)] mb-1">时间推进</div>
-            <div className="font-mono text-lg text-[var(--text-primary)]">
+          <div className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg">
+            <div className="text-sm text-(--text-muted) mb-1">时间推进</div>
+            <div className="font-mono text-lg text-(--text-primary)">
               +{result.timeAdvanced} 分钟
             </div>
           </div>
 
           {/* 暴露度变化 */}
-          <div className="p-4 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg">
-            <div className="text-sm text-[var(--text-muted)] mb-1">暴露度变化</div>
+          <div className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg">
+            <div className="text-sm text-(--text-muted) mb-1">暴露度变化</div>
             <div className={`font-mono text-lg ${
-              result.exposureChange > 0 ? 'text-[var(--danger)]' : 'text-[var(--success)]'
+              result.exposureChange > 0 ? 'text-(--danger)' : 'text-(--success)'
             }`}>
               {result.exposureChange > 0 ? '+' : ''}{result.exposureChange}%
             </div>
@@ -97,22 +97,22 @@ export function FeedbackView({ item, result, onComplete }: FeedbackViewProps) {
 
         {/* 解锁内容 */}
         {result.newLocations && result.newLocations.length > 0 && (
-          <div className="p-4 bg-[var(--bg-tertiary)] border border-[var(--accent-primary)] rounded-lg">
-            <div className="text-sm text-[var(--accent-primary)] mb-2">解锁新地点</div>
+          <div className="p-4 bg-(--bg-tertiary) border border-(--accent-primary) rounded-lg">
+            <div className="text-sm text-(--accent-primary) mb-2">解锁新地点</div>
             <div className="flex flex-wrap gap-2">
               {result.newLocations.map(loc => (
-                <span key={loc.id} className="text-[var(--text-primary)]">{loc.name}</span>
+                <span key={loc.id} className="text-(--text-primary)">{loc.name}</span>
               ))}
             </div>
           </div>
         )}
 
         {result.newNPCs && result.newNPCs.length > 0 && (
-          <div className="p-4 bg-[var(--bg-tertiary)] border border-[var(--accent-primary)] rounded-lg">
-            <div className="text-sm text-[var(--accent-primary)] mb-2">新增可询问对象</div>
+          <div className="p-4 bg-(--bg-tertiary) border border-(--accent-primary) rounded-lg">
+            <div className="text-sm text-(--accent-primary) mb-2">新增可询问对象</div>
             <div className="flex flex-wrap gap-2">
               {result.newNPCs.map(npc => (
-                <span key={npc.id} className="text-[var(--text-primary)]">{npc.name}</span>
+                <span key={npc.id} className="text-(--text-primary)">{npc.name}</span>
               ))}
             </div>
           </div>
