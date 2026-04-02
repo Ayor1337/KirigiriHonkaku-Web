@@ -1,0 +1,62 @@
+// src/components/layout/MainStage.tsx
+
+import { InvestigationView } from '../views/InvestigationView';
+import { DialogueView } from '../views/DialogueView';
+import { FeedbackView } from '../views/FeedbackView';
+import type { GameState, ViewState, NPC, Item } from '../../types/game';
+
+interface MainStageProps {
+  gameState: GameState;
+  viewState: ViewState;
+  activeNPC?: NPC;
+  investigatedItem?: Item;
+  investigationResult?: {
+    description: string;
+    cluesFound: any[];
+    timeAdvanced: number;
+    exposureChange: number;
+  };
+  onSelectNPC: (npc: NPC) => void;
+  onSelectItem: (item: Item) => void;
+  onBackToInvestigation: () => void;
+  onFeedbackComplete: () => void;
+}
+
+export function MainStage({
+  gameState,
+  viewState,
+  activeNPC,
+  investigatedItem,
+  investigationResult,
+  onSelectNPC,
+  onSelectItem,
+  onBackToInvestigation,
+  onFeedbackComplete,
+}: MainStageProps) {
+  return (
+    <main className="h-full bg-[var(--bg-primary)] overflow-hidden">
+      {viewState === 'investigation' && (
+        <InvestigationView
+          gameState={gameState}
+          onSelectNPC={onSelectNPC}
+          onSelectItem={onSelectItem}
+        />
+      )}
+
+      {viewState === 'dialogue' && activeNPC && (
+        <DialogueView
+          npc={activeNPC}
+          onBack={onBackToInvestigation}
+        />
+      )}
+
+      {viewState === 'feedback' && investigatedItem && investigationResult && (
+        <FeedbackView
+          item={investigatedItem}
+          result={investigationResult}
+          onComplete={onFeedbackComplete}
+        />
+      )}
+    </main>
+  );
+}
