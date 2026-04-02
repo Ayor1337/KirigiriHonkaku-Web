@@ -65,11 +65,11 @@ export function BoardCanvas({
     });
   }, [elements]);
 
-  // 鼠标移动时更新绘制中的线并检测目标
+  // 指针移动时更新绘制中的线并检测目标
   useEffect(() => {
     if (!connectingState) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       if (!canvasRef.current) return;
       const rect = canvasRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -98,7 +98,7 @@ export function BoardCanvas({
       setConnectionTarget(targetElement?.id || null);
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
       // 如果有有效的连接目标，完成连接
       if (connectionTarget && connectingState && connectionTarget !== connectingState.fromId) {
         const newConnection: BoardConnection = {
@@ -115,12 +115,12 @@ export function BoardCanvas({
       setConnectionTarget(null);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
     };
   }, [connectingState, connectionTarget, connections, onConnectionsChange, elements]);
 
