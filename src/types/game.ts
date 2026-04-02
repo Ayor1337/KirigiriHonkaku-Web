@@ -48,7 +48,7 @@ export interface GameState {
   situation: string;
 }
 
-export type ViewState = 'investigation' | 'dialogue' | 'feedback';
+export type ViewState = 'investigation' | 'dialogue' | 'feedback' | 'board';
 
 export interface DialogueOption {
   id: string;

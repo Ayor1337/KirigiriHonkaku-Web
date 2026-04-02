@@ -11,6 +11,7 @@ import type { ViewState, NPC, Item, Clue } from '../../types/game';
 export function InvestigationLayout() {
   const [gameState] = useState(mockGameState);
   const [viewState, setViewState] = useState<ViewState>('investigation');
+  const [activeNavId, setActiveNavId] = useState<string>('map');
   const [activeNPC, setActiveNPC] = useState<NPC | undefined>();
   const [investigatedItem, setInvestigatedItem] = useState<Item | undefined>();
   const [newClueIds, setNewClueIds] = useState<string[]>([]);
@@ -25,6 +26,7 @@ export function InvestigationLayout() {
   const handleSelectNPC = (npc: NPC) => {
     setActiveNPC(npc);
     setViewState('dialogue');
+    setActiveNavId('records');
   };
 
   const handleSelectItem = (item: Item) => {
@@ -43,12 +45,14 @@ export function InvestigationLayout() {
   const handleBackToInvestigation = () => {
     setViewState('investigation');
     setActiveNPC(undefined);
+    setActiveNavId('map');
   };
 
   const handleFeedbackComplete = () => {
     setViewState('investigation');
     setInvestigatedItem(undefined);
     setInvestigationResult(undefined);
+    setActiveNavId('clues');
   };
 
   return (
@@ -93,6 +97,16 @@ export function InvestigationLayout() {
         unreadClues={newClueIds.length}
         mapPoints={2}
         connectableClues={1}
+        activeNavId={activeNavId}
+        onNavigate={(newView, navId) => {
+          if (newView !== viewState) {
+            setViewState(newView);
+            if (newView === 'investigation') {
+              setActiveNPC(undefined);
+            }
+          }
+          setActiveNavId(navId);
+        }}
       />
     </div>
   );

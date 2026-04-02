@@ -3,6 +3,7 @@
 import { InvestigationView } from '../views/InvestigationView';
 import { DialogueView } from '../views/DialogueView';
 import { FeedbackView } from '../views/FeedbackView';
+import { DetectiveBoardView } from '../views/DetectiveBoardView';
 import type { GameState, ViewState, NPC, Item, Clue } from '../../types/game';
 
 interface MainStageProps {
@@ -55,6 +56,13 @@ export function MainStage({
           item={investigatedItem}
           result={investigationResult}
           onComplete={onFeedbackComplete}
+        />
+      )}
+
+      {viewState === 'board' && (
+        <DetectiveBoardView
+          gameState={gameState}
+          onBack={onBackToInvestigation}
         />
       )}
     </main>
