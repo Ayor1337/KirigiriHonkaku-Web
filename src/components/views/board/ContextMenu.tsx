@@ -4,7 +4,6 @@ interface ContextMenuProps {
   y: number;
   onClose: () => void;
   onDelete: () => void;
-  onStartConnect: () => void;
   onBringToFront: () => void;
 }
 
@@ -13,30 +12,26 @@ export function ContextMenu({
   y,
   onClose,
   onDelete,
-  onStartConnect,
   onBringToFront,
 }: ContextMenuProps) {
   return (
     <>
-      {/* 点击外部关闭菜单的背景层 */}
+      {/* 背景遮罩，点击关闭菜单 */}
       <div
-        className="fixed inset-0 z-[999]"
+        className="fixed inset-0 z-40"
         onClick={onClose}
       />
+      {/* 菜单 */}
       <div
         className="context-menu"
         style={{ left: x, top: y }}
       >
-        <div className="context-menu-item" onClick={() => { onStartConnect(); onClose(); }}>
-          <span>🔗</span>
-          <span>开始连接</span>
-        </div>
-        <div className="context-menu-item" onClick={() => { onBringToFront(); onClose(); }}>
-          <span>⬆️</span>
+        <div className="context-menu-item" onClick={() => { onBringToFront(); }}>
+          <span>📌</span>
           <span>置于顶层</span>
         </div>
         <div className="context-menu-divider" />
-        <div className="context-menu-item danger" onClick={() => { onDelete(); onClose(); }}>
+        <div className="context-menu-item danger" onClick={() => { onDelete(); }}>
           <span>🗑️</span>
           <span>删除</span>
         </div>
