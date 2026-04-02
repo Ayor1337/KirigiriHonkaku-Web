@@ -10,7 +10,6 @@ interface DraggableCardProps {
   onSelect: () => void;
   onMove: (x: number, y: number) => void;
   onStartConnection: (point: 'top' | 'right' | 'bottom' | 'left') => void;
-  onConnectionTargetChange?: (isTarget: boolean) => void;
   onContextMenu: (e: React.MouseEvent) => void;
 }
 
@@ -22,7 +21,6 @@ export function DraggableCard({
   onSelect,
   onMove,
   onStartConnection,
-  onConnectionTargetChange,
   onContextMenu,
 }: DraggableCardProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -87,8 +85,6 @@ export function DraggableCard({
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerEnter={() => onConnectionTargetChange?.(true)}
-      onPointerLeave={() => onConnectionTargetChange?.(false)}
       onContextMenu={onContextMenu}
     >
       {/* 连接点 */}

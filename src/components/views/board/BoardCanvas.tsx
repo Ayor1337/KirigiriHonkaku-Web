@@ -65,19 +65,37 @@ export function BoardCanvas({
     });
   }, [elements]);
 
-  // 鼠标移动时更新绘制中的线
+  // 鼠标移动时更新绘制中的线并检测目标
   useEffect(() => {
     if (!connectingState) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       if (!canvasRef.current) return;
       const rect = canvasRef.current.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
       setDrawingLine({
         fromX: connectingState.startX,
         fromY: connectingState.startY,
-        toX: e.clientX - rect.left,
-        toY: e.clientY - rect.top,
+        toX: mouseX,
+        toY: mouseY,
       });
+
+      // 检测鼠标下的卡片（排除正在连接的源卡片）
+      const targetElement = elements.find(el => {
+        if (el.id === connectingState.fromId) return false;
+        const width = el.type === 'note' ? 150 : 180;
+        const height = 100;
+        return (
+          mouseX >= el.x &&
+          mouseX <= el.x + width &&
+          mouseY >= el.y &&
+          mouseY <= el.y + height
+        );
+      });
+
+      setConnectionTarget(targetElement?.id || null);
     };
 
     const handleMouseUp = () => {
@@ -104,14 +122,7 @@ export function BoardCanvas({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [connectingState, connectionTarget, connections, onConnectionsChange]);
-
-  // 设置连接目标（当鼠标悬停在卡片上时）
-  const handleConnectionTarget = useCallback((elementId: string | null) => {
-    if (connectingState) {
-      setConnectionTarget(elementId);
-    }
-  }, [connectingState]);
+  }, [connectingState, connectionTarget, connections, onConnectionsChange, elements]);
 
   // 删除连接
   const handleDeleteConnection = useCallback((id: string) => {
@@ -185,7 +196,6 @@ export function BoardCanvas({
           onSelect={() => setSelectedId(element.id)}
           onMove={(x, y) => handleMove(element.id, x, y)}
           onStartConnection={(point) => handleStartConnection(element.id, point)}
-          onConnectionTargetChange={(isTarget) => handleConnectionTarget(isTarget ? element.id : null)}
           onContextMenu={(e) => handleContextMenu(e, element.id)}
         />
       ))}
