@@ -3,7 +3,7 @@
 import { InvestigationView } from '../views/InvestigationView';
 import { DialogueView } from '../views/DialogueView';
 import { FeedbackView } from '../views/FeedbackView';
-import type { GameState, ViewState, NPC, Item } from '../../types/game';
+import type { GameState, ViewState, NPC, Item, Clue } from '../../types/game';
 
 interface MainStageProps {
   gameState: GameState;
@@ -12,7 +12,7 @@ interface MainStageProps {
   investigatedItem?: Item;
   investigationResult?: {
     description: string;
-    cluesFound: any[];
+    cluesFound: Clue[];
     timeAdvanced: number;
     exposureChange: number;
   };
