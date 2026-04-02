@@ -89,7 +89,20 @@ Development uses mock data from `src/data/mock.ts` with the `mockGameState` obje
 
 ## Key Patterns
 
-- Components use TailwindCSS with CSS variable references: `bg-[var(--bg-secondary)]`
+### TailwindCSS v4 Syntax
+
+使用 TailwindCSS v4 推荐的简写语法引用 CSS 变量：
+
+- `bg-(--bg-secondary)` ✓ （推荐）
+- ~~`bg-[var(--bg-secondary)]`~~ ✗ （避免）
+
+同理适用于其他工具类：
+- `text-(--text-primary)`、`border-(--border-color)`
+- `shrink-0` ✓ （推荐）
+- ~~`flex-shrink-0`~~ ✗ （避免）
+
+### 其他模式
+
 - Animation classes are defined in `src/styles/animations.css`
 - Flip cards use the `.flip-card` utility classes with 3D transforms
 - Risk indicator uses SVG with stroke-dashoffset for crack animation
