@@ -1,0 +1,21 @@
+:root {
+  /* 午夜酒红主题 */
+  --bg-primary: #140D12;
+  --bg-secondary: #261820;
+  --bg-tertiary: #1A0F14;
+
+  --accent-primary: #BE4BDB;
+  --accent-secondary: #D946EF;
+  --accent-hover: #F0ABFC;
+
+  --text-primary: #F0EBE5;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+
+  --border-color: #3D2829;
+  --border-hover: #5D4042;
+
+  --danger: #DC2626;
+  --warning: #F59E0B;
+  --success: #10B981;
+}

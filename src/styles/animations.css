@@ -1,0 +1,54 @@
+/* 墨水扩散效果 */
+@keyframes ink-spread {
+  from {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* 脉冲效果 */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(190, 75, 219, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(190, 75, 219, 0);
+  }
+}
+
+/* 裂纹蔓延 - 基础 */
+@keyframes crack-appear {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 卡片翻转 */
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transition: transform 0.5s ease-in-out;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
