@@ -1,0 +1,67 @@
+<h2>设计方案总览</h2>
+<p class="subtitle">哥特神秘风格 · 侦探调查主界面</p>
+
+<div class="section">
+  <h3>整体风格</h3>
+  <ul>
+    <li><b>主题：</b>哥特神秘风格 —— 暗紫与黑色基调、华丽花纹、复古墨迹效果</li>
+    <li><b>配色：</b>午夜酒红系列（背景 #140D12，主色 #261820，强调 #BE4BDB，文字 #F0EBE5）</li>
+    <li><b>布局：</b>黄金比例固定布局（中央舞台60%，左右各20%）</li>
+    <li><b>边框：</b>墨迹晕染效果 —— 边缘不规则的深色渐变</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>字体与排版</h3>
+  <ul>
+    <li><b>标题：</b>Playfair Display（衬线体，强调文献感）</li>
+    <li><b>正文：</b>Inter（无衬线，16px基准，行高1.7）</li>
+    <li><b>时间：</b>打字机风格 —— 1924.10.15 格式</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>四大区域</h3>
+  <ul>
+    <li><b>A. 中央视觉主舞台（60%）：</b>地点标题、场景描述、对话内容、调查结果</li>
+    <li><b>B. 左侧行动列（20%）：</b>可前往地点、可询问NPC、可调查物品</li>
+    <li><b>C. 右侧案情列（20%）：</b>时间、暴露度/裂纹指示器、在场NPC、最新线索</li>
+    <li><b>D. 底部情报带（100%）：</b>地图、线索册、侦探板、对话记录入口</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>交互效果</h3>
+  <ul>
+    <li><b>线索卡：</b>纸张翻折效果，点击翻转显示详情</li>
+    <li><b>按钮悬停：</b>墨水扩散 —— 背景从中心向外晕染</li>
+    <li><b>线索发现：</b>简约脉冲 —— 卡片轻微发光震动，文字淡入</li>
+    <li><b>风险指示器：</b>裂纹蔓延 —— 风险高时裂纹从边缘向中心蔓延</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>三种核心界面状态</h3>
+  <ul>
+    <li><b>默认调查态：</b>浏览场景、查看人物与物品</li>
+    <li><b>对话进行态：</b>与NPC对话、选择话题</li>
+    <li><b>调查反馈态：</b>展示调查结果、获得线索</li>
+  </ul>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="approve" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>确认设计</h3>
+      <p>方案符合预期，继续编写详细设计文档</p>
+    </div>
+  </div>
+  <div class="option" data-choice="revise" onclick="toggleSelect(this)">
+    <div class="letter">✎</div>
+    <div class="content">
+      <h3>需要修改</h3>
+      <p>在终端告诉我需要调整的地方</p>
+    </div>
+  </div>
+</div>
