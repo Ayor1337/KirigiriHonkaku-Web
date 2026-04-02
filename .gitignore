@@ -39,3 +39,10 @@ dist-ssr
 
 # Superpowers temporary files
 .superpowers/
+
+
+# Game Doc
+game_docs
+
+# Playwright test results
+.playwright-mcp
