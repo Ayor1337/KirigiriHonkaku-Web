@@ -1,23 +1,17 @@
 // src/App.tsx
-import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { HomeView } from './components/views/HomeView';
 import { InvestigationLayout } from './components/layout/InvestigationLayout';
 
 function App() {
-  const [showHome, setShowHome] = useState(true);
-
-  const handleEnter = () => {
-    setShowHome(false);
-  };
-
   return (
-    <>
-      {showHome ? (
-        <HomeView onEnter={handleEnter} />
-      ) : (
-        <InvestigationLayout />
-      )}
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomeView />} />
+        <Route path="/game" element={<InvestigationLayout />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

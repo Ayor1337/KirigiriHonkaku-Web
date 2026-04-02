@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 
-interface HomeViewProps {
-  onEnter: () => void;
-}
-
-export function HomeView({ onEnter }: HomeViewProps) {
+export function HomeView() {
+  const navigate = useNavigate();
   const [mounted, setMounted] = useState(false);
   const [titleRevealed, setTitleRevealed] = useState(0);
   const [subtitleRevealed, setSubtitleRevealed] = useState(false);
@@ -129,7 +127,7 @@ export function HomeView({ onEnter }: HomeViewProps) {
 
       {/* 进入按钮 */}
       <button
-        onClick={onEnter}
+        onClick={() => navigate('/game')}
         className={`
           absolute bottom-[20%] left-1/2 -translate-x-1/2
           group flex items-center gap-3
