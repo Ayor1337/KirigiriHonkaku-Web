@@ -17,7 +17,7 @@ export function IntelBar({
   onNavigate,
 }: IntelBarProps) {
   const navItems = [
-    { id: 'map', label: '地图', icon: '🗺️', badge: mapPoints > 0 ? mapPoints : undefined, view: 'investigation' as ViewState },
+    { id: 'map', label: '地图', icon: '🗺️', badge: mapPoints > 0 ? mapPoints : undefined, view: 'map' as ViewState },
     { id: 'clues', label: '线索册', icon: '📋', badge: unreadClues > 0 ? unreadClues : undefined, view: 'investigation' as ViewState },
     { id: 'board', label: '侦探板', icon: '🧩', badge: connectableClues > 0 ? connectableClues : undefined, view: 'board' as ViewState },
     { id: 'records', label: '对话记录', icon: '📝', view: 'dialogue' as ViewState },

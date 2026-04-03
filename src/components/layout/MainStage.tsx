@@ -4,6 +4,7 @@ import { InvestigationView } from '../views/InvestigationView';
 import { DialogueView } from '../views/DialogueView';
 import { FeedbackView } from '../views/FeedbackView';
 import { DetectiveBoardView } from '../views/DetectiveBoardView';
+import { MapView } from '../views/MapView';
 import type { GameState, ViewState, NPC, Item, Clue } from '../../types/game';
 
 interface MainStageProps {
@@ -63,6 +64,12 @@ export function MainStage({
         <DetectiveBoardView
           gameState={gameState}
           onBack={onBackToInvestigation}
+        />
+      )}
+
+      {viewState === 'map' && (
+        <MapView
+          onSelectLocation={(tile) => console.log('Selected location:', tile)}
         />
       )}
     </main>

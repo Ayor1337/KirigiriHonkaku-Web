@@ -10,7 +10,7 @@ import type { ViewState, NPC, Item, Clue } from '../../types/game';
 
 export function InvestigationLayout() {
   const [gameState] = useState(mockGameState);
-  const [viewState, setViewState] = useState<ViewState>('investigation');
+  const [viewState, setViewState] = useState<ViewState>('map');
   const [activeNavId, setActiveNavId] = useState<string>('map');
   const [activeNPC, setActiveNPC] = useState<NPC | undefined>();
   const [investigatedItem, setInvestigatedItem] = useState<Item | undefined>();
@@ -43,7 +43,7 @@ export function InvestigationLayout() {
   };
 
   const handleBackToInvestigation = () => {
-    setViewState('investigation');
+    setViewState('map');
     setActiveNPC(undefined);
     setActiveNavId('map');
   };
