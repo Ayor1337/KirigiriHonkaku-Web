@@ -49,21 +49,20 @@ import type {
 // 工具函数
 // ============================================
 
-/** 生成简单 UUID */
-function uuid(): UUID {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+// ESLint: 这些工具函数目前未被使用，但保留供将来使用
+// function uuid(): UUID {
+//   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+//     const r = (Math.random() * 16) | 0;
+//     const v = c === 'x' ? r : (r & 0x3) | 0x8;
+//     return v.toString(16);
+//   });
+// }
 
-/** 游戏时间转换为 Date */
-function gameTimeToDate(minutes: GameTime, baseDate: Date = new Date('1924-10-15T00:00:00')): Date {
-  const date = new Date(baseDate);
-  date.setMinutes(date.getMinutes() + minutes);
-  return date;
-}
+// function gameTimeToDate(minutes: GameTime, baseDate: Date = new Date('1924-10-15T00:00:00')): Date {
+//   const date = new Date(baseDate);
+//   date.setMinutes(date.getMinutes() + minutes);
+//   return date;
+// }
 
 /** 获取时段描述 */
 function getTimePeriod(minutes: GameTime): string {
@@ -1313,7 +1312,7 @@ function toLegacyNPC(
 /**
  * 将 Clue 转换为旧版 ItemLegacy（作为可调查物品）
  */
-function toLegacyItem(clue: Clue, locationId: string): ItemLegacy {
+function toLegacyItem(clue: Clue): ItemLegacy {
   return {
     id: clue.id,
     name: clue.name,
@@ -1379,7 +1378,7 @@ export function toLegacyGameState(gameData: GameData): GameState {
   // 当前地点的物品（线索）
   const availableItems = clues
     .filter(c => c.current_location_id === currentLocationId && c.clue_state === 'available')
-    .map(clue => toLegacyItem(clue, currentLocationId));
+    .map(clue => toLegacyItem(clue));
 
   // 已发现的线索（被玩家持有的）
   const playerCharacterId = playerCharacter?.id;

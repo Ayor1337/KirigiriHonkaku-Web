@@ -5,6 +5,7 @@ import { DialogueView } from '../views/DialogueView';
 import { FeedbackView } from '../views/FeedbackView';
 import { DetectiveBoardView } from '../views/DetectiveBoardView';
 import { MapView } from '../views/MapView';
+import { PlayerProfileView } from '../views/PlayerProfileView';
 import type { GameState, ViewState, NPC, Item, Clue } from '../../types/game';
 
 interface MainStageProps {
@@ -22,6 +23,7 @@ interface MainStageProps {
   onSelectItem: (item: Item) => void;
   onBackToInvestigation: () => void;
   onFeedbackComplete: () => void;
+  onBackFromProfile?: () => void;
 }
 
 export function MainStage({
@@ -34,6 +36,7 @@ export function MainStage({
   onSelectItem,
   onBackToInvestigation,
   onFeedbackComplete,
+  onBackFromProfile,
 }: MainStageProps) {
   return (
     <main className="h-full bg-(--bg-primary) overflow-hidden">
@@ -70,6 +73,13 @@ export function MainStage({
       {viewState === 'map' && (
         <MapView
           onSelectLocation={(tile) => console.log('Selected location:', tile)}
+        />
+      )}
+
+      {viewState === 'profile' && (
+        <PlayerProfileView
+          gameState={gameState}
+          onBack={onBackFromProfile || onBackToInvestigation}
         />
       )}
     </main>

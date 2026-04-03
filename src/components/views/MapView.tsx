@@ -1,5 +1,5 @@
 // src/components/views/MapView.tsx
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { mansionMap } from '../../data/mapMock';
 import type { GameMap, MapNode, MapConnection, MapViewState } from '../../types/map';
 
@@ -17,13 +17,11 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
     isDragging: false,
   });
 
-  // 节点位置状态（支持拖拽节点）
-  const [nodes, setNodes] = useState<MapNode[]>(map.nodes);
-  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  // 节点位置状态
+  const [nodes] = useState<MapNode[]>(map.nodes);
 
   const dragStart = useRef({ x: 0, y: 0 });
   const lastOffset = useRef({ x: 0, y: 0 });
-  const nodeDragStart = useRef({ x: 0, y: 0 });
 
   // 初始化居中
   useEffect(() => {
@@ -47,17 +45,8 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
     setViewState(prev => ({ ...prev, isDragging: true }));
   }, [viewState.offsetX, viewState.offsetY]);
 
-  // 处理节点拖拽开始
-  const handleNodeMouseDown = useCallback((e: React.MouseEvent, nodeId: string) => {
-    e.stopPropagation();
-    if (e.button !== 0) return;
-    nodeDragStart.current = { x: e.clientX, y: e.clientY };
-    setDraggingNodeId(nodeId);
-  }, []);
-
   // 处理移动
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    // 拖拽画布
     if (viewState.isDragging) {
       const dx = e.clientX - dragStart.current.x;
       const dy = e.clientY - dragStart.current.y;
@@ -67,21 +56,11 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
         offsetY: lastOffset.current.y + dy,
       }));
     }
-    // 拖拽节点
-    if (draggingNodeId) {
-      const dx = (e.clientX - nodeDragStart.current.x) / viewState.scale;
-      const dy = (e.clientY - nodeDragStart.current.y) / viewState.scale;
-      nodeDragStart.current = { x: e.clientX, y: e.clientY };
-      setNodes(prev => prev.map(n =>
-        n.id === draggingNodeId ? { ...n, x: n.x + dx, y: n.y + dy } : n
-      ));
-    }
-  }, [viewState.isDragging, draggingNodeId, viewState.scale]);
+  }, [viewState.isDragging]);
 
   // 处理释放
   const handleMouseUp = useCallback(() => {
     setViewState(prev => ({ ...prev, isDragging: false }));
-    setDraggingNodeId(null);
   }, []);
 
   // 滚轮缩放
@@ -248,7 +227,7 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
             </marker>
           </defs>
 
-          {map.connections.filter(isConnectionVisible).map((conn, idx) => {
+          {map.connections.filter(isConnectionVisible).map((conn) => {
             const from = nodes.find(n => n.id === conn.fromId);
             const to = nodes.find(n => n.id === conn.toId);
             if (!from || !to) return null;
@@ -317,7 +296,6 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
                 width: 80,
                 height: 80,
               }}
-              onMouseDown={(e) => handleNodeMouseDown(e, node.id)}
               onClick={(e) => {
                 e.stopPropagation();
                 if (!isUnexplored) {

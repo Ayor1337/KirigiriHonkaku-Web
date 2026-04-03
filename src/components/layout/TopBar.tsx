@@ -1,6 +1,6 @@
 // src/components/layout/TopBar.tsx
 import { TimeDisplay } from '../ui/TimeDisplay';
-import { RiskIndicator } from '../ui/RiskIndicator';
+import { ThemeToggle } from '../ui/ThemeToggle';
 import type { GameState } from '../../types/game';
 
 interface TopBarProps {
@@ -24,8 +24,10 @@ export function TopBar({ gameState }: TopBarProps) {
         </span>
       </div>
 
-      {/* 右侧：风险指示器 */}
-      <RiskIndicator level={gameState.exposureLevel} />
+      {/* 右侧：主题切换按钮 */}
+      <div className="flex items-center justify-end w-24">
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

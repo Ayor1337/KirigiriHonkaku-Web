@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 
 export function HomeView() {
   const navigate = useNavigate();
-  const [mounted, setMounted] = useState(false);
+  const [mounted] = useState(true);
   const [titleRevealed, setTitleRevealed] = useState(0);
   const [subtitleRevealed, setSubtitleRevealed] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(false);
@@ -12,8 +12,6 @@ export function HomeView() {
   const subtitle = "KIRIGIRI HONKAKU";
 
   useEffect(() => {
-    setMounted(true);
-
     // 逐字显现标题
     const titleInterval = setInterval(() => {
       setTitleRevealed(prev => {

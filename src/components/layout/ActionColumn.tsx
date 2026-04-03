@@ -9,6 +9,7 @@ interface ActionColumnProps {
   onSelectLocation: (location: Location) => void;
   onSelectNPC: (npc: NPC) => void;
   onSelectItem: (item: Item) => void;
+  onViewPlayerProfile?: () => void;
   activeNPCId?: string;
 }
 
@@ -17,6 +18,7 @@ export function ActionColumn({
   onSelectLocation,
   onSelectNPC,
   onSelectItem,
+  onViewPlayerProfile,
   activeNPCId,
 }: ActionColumnProps) {
   return (
@@ -27,7 +29,10 @@ export function ActionColumn({
           <span className="w-1.5 h-1.5 rounded-full bg-(--accent-primary)" />
           侦探档案
         </h3>
-        <div className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg">
+        <div
+          onClick={onViewPlayerProfile}
+          className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg cursor-pointer hover:border-(--accent-primary) transition-all duration-300 hover:shadow-lg hover:shadow-(--accent-primary)/10 group"
+        >
           <div className="flex items-center gap-3 mb-3">
             <div className="w-12 h-12 rounded-full bg-(--accent-primary)/20 border border-(--accent-primary)/40 flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-6 h-6 text-(--accent-primary)" fill="currentColor">

@@ -55,6 +55,16 @@ export function InvestigationLayout() {
     setActiveNavId('clues');
   };
 
+  const handleViewPlayerProfile = () => {
+    setViewState('profile');
+    setActiveNavId('profile');
+  };
+
+  const handleBackFromProfile = () => {
+    setViewState('map');
+    setActiveNavId('map');
+  };
+
   return (
     <div className="investigation-layout h-screen flex flex-col bg-(--bg-primary)">
       {/* 顶部栏 */}
@@ -68,6 +78,7 @@ export function InvestigationLayout() {
           onSelectLocation={() => {}}
           onSelectNPC={handleSelectNPC}
           onSelectItem={handleSelectItem}
+          onViewPlayerProfile={handleViewPlayerProfile}
           activeNPCId={activeNPC?.id}
         />
 
@@ -82,6 +93,7 @@ export function InvestigationLayout() {
           onSelectItem={handleSelectItem}
           onBackToInvestigation={handleBackToInvestigation}
           onFeedbackComplete={handleFeedbackComplete}
+          onBackFromProfile={handleBackFromProfile}
         />
 
         {/* 右侧案情列 */}

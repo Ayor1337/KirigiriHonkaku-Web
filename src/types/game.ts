@@ -54,7 +54,7 @@ export type BehaviorType = 'idle' | 'work' | 'travel' | 'rest' | 'event' | 'hidd
 // 视图状态（保持与现有组件兼容）
 // ============================================
 
-export type ViewState = 'investigation' | 'dialogue' | 'feedback' | 'board' | 'map';
+export type ViewState = 'investigation' | 'dialogue' | 'feedback' | 'board' | 'map' | 'profile';
 
 // ============================================
 // 会话根表
