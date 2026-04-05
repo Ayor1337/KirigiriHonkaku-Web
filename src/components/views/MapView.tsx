@@ -155,7 +155,7 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-[#0a0609] cursor-grab active:cursor-grabbing select-none"
+      className="relative w-full h-full overflow-hidden bg-(--bg-primary) cursor-grab active:cursor-grabbing select-none"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -322,8 +322,8 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
                   ${isCurrent ? 'animate-pulse' : ''}
                 `}
                 style={{
-                  backgroundColor: isUnexplored ? '#1a1418' : `${regionColor}20`,
-                  borderColor: isCurrent ? regionColor : isUnexplored ? '#3d2829' : `${regionColor}60`,
+                  backgroundColor: isUnexplored ? 'var(--bg-secondary)' : `${regionColor}20`,
+                  borderColor: isCurrent ? regionColor : isUnexplored ? 'var(--border-color)' : `${regionColor}60`,
                   boxShadow: isCurrent ? `0 0 30px ${regionColor}80` : `0 0 15px ${regionColor}30`,
                 }}
               >
@@ -334,7 +334,7 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
 
                 {/* 名称 */}
                 <span className="text-[9px] text-center px-2 leading-tight select-none"
-                  style={{ color: isUnexplored ? '#6b7280' : '#f0ebe5' }}
+                  style={{ color: isUnexplored ? 'var(--text-muted)' : 'var(--text-primary)' }}
                 >
                   {node.label}
                 </span>
@@ -355,7 +355,7 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
 
                 {/* 锁定标记 */}
                 {node.isLocked && !isUnexplored && (
-                  <span className="absolute -bottom-1 bg-[#1a1418] border border-[#ef4444] rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  <span className="absolute -bottom-1 bg-(--bg-secondary) border border-(--danger) rounded-full w-5 h-5 flex items-center justify-center text-xs">
                     🔒
                   </span>
                 )}
@@ -378,23 +378,23 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
       {/* UI 控制层 */}
       <div className="absolute top-4 left-4 flex flex-col gap-2 pointer-events-auto">
         {/* 地图标题 */}
-        <div className="bg-[#0f0a0d]/90 backdrop-blur-md border border-[#3d2829] rounded-xl p-4 max-w-[240px]">
-          <h3 className="text-[#f0ebe5] font-serif text-xl">{map.name}</h3>
-          <p className="text-[#9ca3af] text-xs mt-1 leading-relaxed">{map.description}</p>
+        <div className="bg-(--bg-secondary)/90 backdrop-blur-md border border-(--border-color) rounded-xl p-4 max-w-[240px]">
+          <h3 className="text-(--text-primary) font-serif text-xl">{map.name}</h3>
+          <p className="text-(--text-secondary) text-xs mt-1 leading-relaxed">{map.description}</p>
         </div>
 
         {/* 缩放控制 */}
-        <div className="flex items-center gap-2 bg-[#0f0a0d]/80 backdrop-blur-sm border border-[#3d2829] rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-(--bg-secondary)/80 backdrop-blur-sm border border-(--border-color) rounded-lg p-1">
           <button
             onClick={() => setViewState(prev => ({ ...prev, scale: Math.max(0.3, prev.scale - 0.1) }))}
-            className="w-8 h-8 flex items-center justify-center text-[#f0ebe5] hover:text-[#be4bdb] transition-colors rounded"
+            className="w-8 h-8 flex items-center justify-center text-(--text-primary) hover:text-(--accent-primary) transition-colors rounded"
           >
             −
           </button>
-          <span className="text-[#9ca3af] text-xs w-12 text-center">{Math.round(viewState.scale * 100)}%</span>
+          <span className="text-(--text-secondary) text-xs w-12 text-center">{Math.round(viewState.scale * 100)}%</span>
           <button
             onClick={() => setViewState(prev => ({ ...prev, scale: Math.min(2, prev.scale + 0.1) }))}
-            className="w-8 h-8 flex items-center justify-center text-[#f0ebe5] hover:text-[#be4bdb] transition-colors rounded"
+            className="w-8 h-8 flex items-center justify-center text-(--text-primary) hover:text-(--accent-primary) transition-colors rounded"
           >
             +
           </button>
@@ -413,16 +413,16 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
               }));
             }
           }}
-          className="bg-[#0f0a0d]/80 backdrop-blur-sm border border-[#3d2829] text-[#9ca3af] text-xs px-3 py-2 rounded-lg hover:border-[#be4bdb] hover:text-[#f0ebe5] transition-colors"
+          className="bg-(--bg-secondary)/80 backdrop-blur-sm border border-(--border-color) text-(--text-secondary) text-xs px-3 py-2 rounded-lg hover:border-(--accent-primary) hover:text-(--text-primary) transition-colors"
         >
           重置视角
         </button>
       </div>
 
       {/* 图例 */}
-      <div className="absolute bottom-4 right-4 bg-[#0f0a0d]/90 backdrop-blur-md border border-[#3d2829] rounded-xl p-4 pointer-events-auto">
-        <h4 className="text-[#f0ebe5] text-xs font-semibold mb-3">图例</h4>
-        <div className="space-y-2 text-[10px] text-[#9ca3af]">
+      <div className="absolute bottom-4 right-4 bg-(--bg-secondary)/90 backdrop-blur-md border border-(--border-color) rounded-xl p-4 pointer-events-auto">
+        <h4 className="text-(--text-primary) text-xs font-semibold mb-3">图例</h4>
+        <div className="space-y-2 text-[10px] text-(--text-secondary)">
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-[#be4bdb]/30 border border-[#be4bdb]"></span>
             <span>主馆区域</span>
@@ -456,20 +456,20 @@ export function MapView({ map = mansionMap, onSelectLocation }: MapViewProps) {
         if (!node || node.status === 'unexplored') return null;
 
         return (
-          <div className="absolute bottom-4 left-4 bg-[#0f0a0d]/95 backdrop-blur-md border border-[#be4bdb]/50 rounded-xl p-4 pointer-events-none max-w-[280px]">
+          <div className="absolute bottom-4 left-4 bg-(--bg-secondary)/95 backdrop-blur-md border border-(--accent-primary)/50 rounded-xl p-4 pointer-events-none max-w-[280px]">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-2xl">{node.icon}</span>
               <div>
-                <h4 className="text-[#f0ebe5] font-medium">{node.label}</h4>
-                <span className="text-[10px] text-[#9ca3af]">
+                <h4 className="text-(--text-primary) font-medium">{node.label}</h4>
+                <span className="text-[10px] text-(--text-secondary)">
                   {node.region === 'main' ? '主馆' : node.region === 'east' ? '东翼' : node.region === 'west' ? '西翼' : node.region === 'garden' ? '花园' : '地下室'}
                 </span>
               </div>
             </div>
             {node.description && (
-              <p className="text-xs text-[#9ca3af] leading-relaxed mb-2">{node.description}</p>
+              <p className="text-xs text-(--text-secondary) leading-relaxed mb-2">{node.description}</p>
             )}
-            <div className="flex gap-3 text-[10px] text-[#6b7280]">
+            <div className="flex gap-3 text-[10px] text-(--text-muted)">
               {node.clueCount > 0 && <span>🔍 {node.clueCount} 条线索</span>}
               {node.npcCount > 0 && <span>👤 {node.npcCount} 位人物</span>}
               {node.isLocked && <span className="text-[#ef4444]">🔒 已上锁</span>}

@@ -71,7 +71,7 @@ export function HomeView() {
       <div
         className={`
           absolute top-[15%] left-1/2 -translate-x-1/2
-          h-px bg-gradient-to-r from-transparent via-(--border-color) to-transparent
+          h-px bg-linear-to-r from-transparent via-(--border-color) to-transparent
           transition-all duration-1000 delay-500
           ${mounted ? 'w-32 opacity-100' : 'w-0 opacity-0'}
         `}
@@ -117,7 +117,7 @@ export function HomeView() {
       <div
         className={`
           absolute bottom-[15%] left-1/2 -translate-x-1/2
-          h-px bg-gradient-to-r from-transparent via-(--border-color) to-transparent
+          h-px bg-linear-to-r from-transparent via-(--border-color) to-transparent
           transition-all duration-1000 delay-700
           ${mounted ? 'w-32 opacity-100' : 'w-0 opacity-0'}
         `}

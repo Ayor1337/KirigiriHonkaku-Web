@@ -91,7 +91,7 @@
 .connection-point.bottom { bottom: -6px; left: 50%; transform: translateX(-50%); }
 .connection-point.left { left: -6px; top: 50%; transform: translateY(-50%); }
 
-/* 线索卡片 - 泛黄纸张质感 */
+/* 线索卡片 - 泛黄纸张质感（固定颜色，与主题无关） */
 .card-clue {
   background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
   color: #2a1f1a;
@@ -132,7 +132,7 @@
   opacity: 0.8;
 }
 
-/* 人物卡片 - 拍立得风格 */
+/* 人物卡片 - 拍立得风格（固定颜色，与主题无关） */
 .card-npc {
   background: #fff;
   padding: 12px 12px 20px 12px;
@@ -171,7 +171,7 @@
   margin-top: 4px;
 }
 
-/* 地点卡片 - 地图风格 */
+/* 地点卡片 - 地图风格（固定颜色，与主题无关） */
 .card-location {
   background: linear-gradient(135deg, #e8dcc8 0%, #d4c8b0 100%);
   border: 1px solid #c0b090;
@@ -204,10 +204,10 @@
   color: #5a5040;
 }
 
-/* 时间卡片 */
+/* 时间卡片（固定颜色，与主题无关） */
 .card-time {
   background: linear-gradient(135deg, #1a1425 0%, #261820 100%);
-  border: 1px solid var(--accent-primary);
+  border: 1px solid #be4bdb;
   padding: 12px 16px;
   border-radius: 4px;
   box-shadow: 0 0 15px rgba(190, 75, 219, 0.2);
@@ -229,7 +229,7 @@
   margin-top: 4px;
 }
 
-/* 便利贴 - 手写风格 */
+/* 便利贴 - 手写风格（固定颜色，与主题无关） */
 .card-note {
   background: #fef3a8;
   padding: 16px;
@@ -349,7 +349,7 @@
   flex-direction: column;
   gap: 8px;
   z-index: 50;
-  background: rgba(20, 13, 18, 0.8);
+  background: var(--bg-secondary);
   backdrop-filter: blur(8px);
   padding: 12px 8px;
   border-radius: 8px;
@@ -388,7 +388,7 @@
   right: 16px;
   top: 80px;
   width: 280px;
-  background: rgba(20, 13, 18, 0.95);
+  background: var(--bg-secondary);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
   border-radius: 8px;
