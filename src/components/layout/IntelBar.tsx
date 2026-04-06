@@ -1,5 +1,12 @@
 // src/components/layout/IntelBar.tsx
-import type { ViewState } from '../../types/game';
+
+type ViewState =
+  | "investigation"
+  | "dialogue"
+  | "feedback"
+  | "board"
+  | "map"
+  | "profile";
 
 interface IntelBarProps {
   unreadClues?: number;
@@ -13,14 +20,37 @@ export function IntelBar({
   unreadClues = 0,
   mapPoints = 0,
   connectableClues = 0,
-  activeNavId = 'map',
+  activeNavId = "map",
   onNavigate,
 }: IntelBarProps) {
   const navItems = [
-    { id: 'map', label: '地图', icon: '🗺️', badge: mapPoints > 0 ? mapPoints : undefined, view: 'map' as ViewState },
-    { id: 'clues', label: '线索册', icon: '📋', badge: unreadClues > 0 ? unreadClues : undefined, view: 'investigation' as ViewState },
-    { id: 'board', label: '侦探板', icon: '🧩', badge: connectableClues > 0 ? connectableClues : undefined, view: 'board' as ViewState },
-    { id: 'records', label: '对话记录', icon: '📝', view: 'dialogue' as ViewState },
+    {
+      id: "map",
+      label: "地图",
+      icon: "🗺️",
+      badge: mapPoints > 0 ? mapPoints : undefined,
+      view: "map" as ViewState,
+    },
+    {
+      id: "clues",
+      label: "线索册",
+      icon: "📋",
+      badge: unreadClues > 0 ? unreadClues : undefined,
+      view: "investigation" as ViewState,
+    },
+    {
+      id: "board",
+      label: "侦探板",
+      icon: "🧩",
+      badge: connectableClues > 0 ? connectableClues : undefined,
+      view: "board" as ViewState,
+    },
+    {
+      id: "records",
+      label: "对话记录",
+      icon: "📝",
+      view: "dialogue" as ViewState,
+    },
   ];
 
   return (
@@ -31,9 +61,10 @@ export function IntelBar({
           onClick={() => onNavigate?.(item.view, item.id)}
           className={`
             relative flex items-center gap-2 px-4 py-2 text-sm transition-colors rounded-md
-            ${activeNavId === item.id
-              ? 'text-(--accent-primary) bg-(--accent-primary)/10'
-              : 'text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--bg-tertiary)'
+            ${
+              activeNavId === item.id
+                ? "text-(--accent-primary) bg-(--accent-primary)/10"
+                : "text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--bg-tertiary)"
             }
           `}
         >

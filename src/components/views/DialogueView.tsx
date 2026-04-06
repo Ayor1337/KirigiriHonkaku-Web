@@ -1,41 +1,38 @@
 // src/components/views/DialogueView.tsx
-import { useState } from 'react';
-import { InkButton } from '../ui/InkButton';
-import type { NPC } from '../../types/game';
-
-interface DialogueOption {
-  id: string;
-  text: string;
-  response: string;
-}
+import { InkButton } from "../ui/InkButton";
+import type { VisibleNpc, LatestDialogue } from "../../types/api";
 
 interface DialogueViewProps {
-  npc: NPC;
+  activeNpcKey?: string;
+  visibleNpcs: VisibleNpc[];
+  narrativeText?: string | null;
+  latestDialogue?: LatestDialogue | null;
   onBack: () => void;
 }
 
-const mockDialogueOptions: DialogueOption[] = [
-  { id: '1', text: '你昨晚看到了什么？', response: '我...我不能说。那个人警告过我。' },
-  { id: '2', text: '你认识受害者吗？', response: '只见过几次。他总是独来独往。' },
-  { id: '3', text: '这里的钢琴是你的吗？', response: '是的，我每晚都在这里演奏。直到那晚...' },
-];
+export function DialogueView({
+  activeNpcKey,
+  visibleNpcs,
+  narrativeText,
+  latestDialogue,
+  onBack,
+}: DialogueViewProps) {
+  const activeNpc = visibleNpcs.find((n) => n.key === activeNpcKey);
+  const npcName = activeNpc?.display_name ?? "未知人物";
 
-export function DialogueView({ npc, onBack }: DialogueViewProps) {
-  const [dialogue, setDialogue] = useState<string[]>([
-    `${npc.name}看着你，眼神中带着警惕。`,
-  ]);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  // 构建对话内容
+  const dialogueLines: { speaker: "npc" | "narrator"; text: string }[] = [];
 
-  const handleSelectOption = (option: DialogueOption) => {
-    if (selectedOptions.includes(option.id)) return;
+  if (narrativeText) {
+    dialogueLines.push({ speaker: "npc", text: narrativeText });
+  }
 
-    setDialogue(prev => [
-      ...prev,
-      `你问："${option.text}"`,
-      `${npc.name}回答："${option.response}"`,
-    ]);
-    setSelectedOptions(prev => [...prev, option.id]);
-  };
+  if (dialogueLines.length === 0) {
+    dialogueLines.push({
+      speaker: "narrator",
+      text: `${npcName}看着你，等待你的提问。`,
+    });
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -43,13 +40,23 @@ export function DialogueView({ npc, onBack }: DialogueViewProps) {
       <header className="p-6 border-b border-(--border-color) flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full bg-(--bg-secondary) border border-(--border-color) flex items-center justify-center">
-            <svg viewBox="0 0 24 24" className="w-8 h-8 text-(--text-muted)" fill="currentColor">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            <svg
+              viewBox="0 0 24 24"
+              className="w-8 h-8 text-(--text-muted)"
+              fill="currentColor"
+            >
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
             </svg>
           </div>
           <div>
-            <h2 className="font-heading text-2xl text-(--text-primary)">{npc.name}</h2>
-            <span className="text-sm text-(--text-muted)">{npc.title}</span>
+            <h2 className="font-heading text-2xl text-(--text-primary)">
+              {npcName}
+            </h2>
+            {latestDialogue?.npc_key && (
+              <span className="text-sm text-(--text-muted)">
+                {latestDialogue.npc_key}
+              </span>
+            )}
           </div>
         </div>
         <InkButton variant="ghost" size="sm" onClick={onBack}>
@@ -59,45 +66,29 @@ export function DialogueView({ npc, onBack }: DialogueViewProps) {
 
       {/* 对话内容区 */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {dialogue.map((line, index) => {
-          const isPlayer = line.startsWith('你问：');
-          return (
+        {dialogueLines.map((line, index) => (
+          <div
+            key={index}
+            className={`flex ${line.speaker === "narrator" ? "justify-center" : "justify-start"}`}
+          >
             <div
-              key={index}
-              className={`flex ${isPlayer ? 'justify-end' : 'justify-start'}`}
+              className={`max-w-[80%] p-4 rounded-lg ${
+                line.speaker === "npc"
+                  ? "bg-(--bg-secondary) text-(--text-primary)"
+                  : "bg-(--bg-tertiary) text-(--text-secondary) italic"
+              }`}
             >
-              <div
-                className={`max-w-[80%] p-4 rounded-lg ${
-                  isPlayer
-                    ? 'bg-(--accent-primary) text-white'
-                    : 'bg-(--bg-secondary) text-(--text-primary)'
-                }`}
-              >
-                <p className="leading-relaxed">{line.replace(/^(你问：|.+回答：)/, '')}</p>
-              </div>
+              <p className="leading-relaxed">{line.text}</p>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
-      {/* 话题选项 */}
+      {/* 底部提示 */}
       <div className="p-6 border-t border-(--border-color) bg-(--bg-secondary)">
-        <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3">
-          可追问的话题
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {mockDialogueOptions.map((option) => (
-            <InkButton
-              key={option.id}
-              variant={selectedOptions.includes(option.id) ? 'ghost' : 'default'}
-              size="sm"
-              onClick={() => handleSelectOption(option)}
-            >
-              {option.text}
-              {selectedOptions.includes(option.id) && ' ✓'}
-            </InkButton>
-          ))}
-        </div>
+        <p className="text-xs text-(--text-muted) text-center">
+          对话内容由 AI 根据角色性格和当前情境生成
+        </p>
       </div>
     </div>
   );

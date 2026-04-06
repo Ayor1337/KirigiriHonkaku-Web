@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useGameSession } from "../../hooks/useGameSession";
 
 export function HomeView() {
   const navigate = useNavigate();
+  const game = useGameSession();
   const [mounted] = useState(true);
   const [titleRevealed, setTitleRevealed] = useState(0);
   const [subtitleRevealed, setSubtitleRevealed] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
 
   const title = "霧切本格";
   const subtitle = "KIRIGIRI HONKAKU";
@@ -14,7 +17,7 @@ export function HomeView() {
   useEffect(() => {
     // 逐字显现标题
     const titleInterval = setInterval(() => {
-      setTitleRevealed(prev => {
+      setTitleRevealed((prev) => {
         if (prev >= title.length) {
           clearInterval(titleInterval);
           return prev;
@@ -24,14 +27,20 @@ export function HomeView() {
     }, 180);
 
     // 副标题延迟显现
-    const subtitleTimer = setTimeout(() => {
-      setSubtitleRevealed(true);
-    }, title.length * 180 + 400);
+    const subtitleTimer = setTimeout(
+      () => {
+        setSubtitleRevealed(true);
+      },
+      title.length * 180 + 400,
+    );
 
     // 按钮延迟显现
-    const buttonTimer = setTimeout(() => {
-      setButtonVisible(true);
-    }, title.length * 180 + 800);
+    const buttonTimer = setTimeout(
+      () => {
+        setButtonVisible(true);
+      },
+      title.length * 180 + 800,
+    );
 
     return () => {
       clearInterval(titleInterval);
@@ -40,6 +49,17 @@ export function HomeView() {
     };
   }, []);
 
+  const handleStartGame = async (templateKey: string) => {
+    try {
+      const { sessionId, playerId } = await game.startGame(templateKey);
+      navigate(
+        `/game?sessionId=${sessionId}&playerId=${playerId}&template=${templateKey}`,
+      );
+    } catch {
+      // error is already stored in game.error
+    }
+  };
+
   return (
     <div
       className={`
@@ -47,7 +67,7 @@ export function HomeView() {
         bg-(--bg-primary)
         flex flex-col items-center justify-center
         transition-opacity duration-1000
-        ${mounted ? 'opacity-100' : 'opacity-0'}
+        ${mounted ? "opacity-100" : "opacity-0"}
       `}
     >
       {/* 噪点纹理背景 */}
@@ -63,7 +83,8 @@ export function HomeView() {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
           w-[600px] h-[600px] rounded-full pointer-events-none"
         style={{
-          background: 'radial-gradient(circle, rgba(190, 75, 219, 0.08) 0%, transparent 70%)',
+          background:
+            "radial-gradient(circle, rgba(190, 75, 219, 0.08) 0%, transparent 70%)",
         }}
       />
 
@@ -73,7 +94,7 @@ export function HomeView() {
           absolute top-[15%] left-1/2 -translate-x-1/2
           h-px bg-linear-to-r from-transparent via-(--border-color) to-transparent
           transition-all duration-1000 delay-500
-          ${mounted ? 'w-32 opacity-100' : 'w-0 opacity-0'}
+          ${mounted ? "w-32 opacity-100" : "w-0 opacity-0"}
         `}
       />
 
@@ -81,19 +102,24 @@ export function HomeView() {
       <div className="relative z-10 text-center px-8">
         {/* 日文标题 - 逐字显现 */}
         <h1 className="font-serif text-[clamp(3rem,12vw,8rem)] tracking-[0.3em] mb-6">
-          {title.split('').map((char, index) => (
+          {title.split("").map((char, index) => (
             <span
               key={index}
               className={`
                 inline-block transition-all duration-500
-                ${index < titleRevealed
-                  ? 'opacity-100 translate-y-0 blur-0'
-                  : 'opacity-0 translate-y-4 blur-sm'
+                ${
+                  index < titleRevealed
+                    ? "opacity-100 translate-y-0 blur-0"
+                    : "opacity-0 translate-y-4 blur-sm"
                 }
               `}
               style={{
-                color: index < titleRevealed ? 'var(--text-primary)' : 'transparent',
-                textShadow: index < titleRevealed ? '0 0 40px rgba(190, 75, 219, 0.3)' : 'none',
+                color:
+                  index < titleRevealed ? "var(--text-primary)" : "transparent",
+                textShadow:
+                  index < titleRevealed
+                    ? "0 0 40px rgba(190, 75, 219, 0.3)"
+                    : "none",
               }}
             >
               {char}
@@ -106,7 +132,7 @@ export function HomeView() {
           className={`
             font-serif text-[clamp(0.75rem,2vw,1rem)] tracking-[0.6em]
             text-(--text-muted) transition-all duration-700
-            ${subtitleRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}
+            ${subtitleRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
           `}
         >
           {subtitle}
@@ -119,38 +145,94 @@ export function HomeView() {
           absolute bottom-[15%] left-1/2 -translate-x-1/2
           h-px bg-linear-to-r from-transparent via-(--border-color) to-transparent
           transition-all duration-1000 delay-700
-          ${mounted ? 'w-32 opacity-100' : 'w-0 opacity-0'}
+          ${mounted ? "w-32 opacity-100" : "w-0 opacity-0"}
         `}
       />
 
-      {/* 进入按钮 */}
-      <button
-        onClick={() => navigate('/game')}
-        className={`
-          absolute bottom-[20%] left-1/2 -translate-x-1/2
-          group flex items-center gap-3
-          px-8 py-4
-          font-serif text-sm tracking-[0.3em] uppercase
-          text-(--text-secondary)
-          border border-(--border-color)
-          bg-transparent
-          transition-all duration-500
-          hover:border-(--accent-primary) hover:text-(--text-primary)
-          hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
-          ${buttonVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'}
-        `}
-      >
-        <span>进入调查</span>
-        <svg
-          className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
+      {/* 进入按钮 / 模板选择 */}
+      {!showTemplates ? (
+        <button
+          onClick={() => setShowTemplates(true)}
+          className={`
+            absolute bottom-[20%] left-1/2 -translate-x-1/2
+            group flex items-center gap-3
+            px-8 py-4
+            font-serif text-sm tracking-[0.3em] uppercase
+            text-(--text-secondary)
+            border border-(--border-color)
+            bg-transparent
+            transition-all duration-500
+            hover:border-(--accent-primary) hover:text-(--text-primary)
+            hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
+            ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}
+          `}
         >
-          <path d="M9 18l6-6-6-6" />
-        </svg>
-      </button>
+          <span>进入调查</span>
+          <svg
+            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      ) : (
+        <div
+          className={`
+            absolute bottom-[12%] left-1/2 -translate-x-1/2
+            flex flex-col items-center gap-4
+            transition-all duration-500
+            ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
+          `}
+        >
+          <p className="font-serif text-sm tracking-[0.2em] text-(--text-muted) mb-2">
+            选择案件模板
+          </p>
+
+          {game.error && (
+            <p className="text-sm text-red-400 mb-2">{game.error}</p>
+          )}
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => handleStartGame("manor")}
+              disabled={game.loading}
+              className="group px-8 py-4 border border-(--border-color) bg-transparent
+                font-serif text-sm tracking-[0.2em] text-(--text-secondary)
+                transition-all duration-500
+                hover:border-(--accent-primary) hover:text-(--text-primary)
+                hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
+                disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="text-lg mb-1">🏚️</div>
+              <span>雾切洋馆</span>
+            </button>
+
+            <button
+              onClick={() => handleStartGame("theater")}
+              disabled={game.loading}
+              className="group px-8 py-4 border border-(--border-color) bg-transparent
+                font-serif text-sm tracking-[0.2em] text-(--text-secondary)
+                transition-all duration-500
+                hover:border-(--accent-primary) hover:text-(--text-primary)
+                hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
+                disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <div className="text-lg mb-1">🎭</div>
+              <span>剧场奇案</span>
+            </button>
+          </div>
+
+          {game.loading && (
+            <div className="flex items-center gap-2 text-(--text-muted) text-sm">
+              <div className="w-4 h-4 border-2 border-(--accent-primary) border-t-transparent rounded-full animate-spin" />
+              <span>正在创建游戏会话...</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 角落装饰 */}
       <div className="absolute top-8 left-8 w-12 h-12 border-l border-t border-(--border-color) opacity-50" />

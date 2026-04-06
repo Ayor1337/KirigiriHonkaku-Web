@@ -1,29 +1,39 @@
 // src/components/views/PlayerProfileView.tsx
 // 玩家个人资料页面 - 维多利亚档案柜风格
 
-import type { GameState } from '../../types/game';
+import type { ExposureInfo } from "../../types/api";
 
 interface PlayerProfileViewProps {
-  gameState: GameState;
+  exposure: ExposureInfo;
+  discoveredClueCount: number;
+  currentTimeMinute: number;
   onBack: () => void;
 }
 
-export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps) {
-  // 计算统计数据
-  const discoveredCluesCount = gameState.discoveredClues.length;
-  const totalLocations = gameState.availableLocations.length;
-  const exploredLocations = 5; // 模拟已探索数量
-  const talkedNPCs = 2; // 模拟已对话NPC数
-
+export function PlayerProfileView({
+  exposure,
+  discoveredClueCount,
+  currentTimeMinute,
+  onBack,
+}: PlayerProfileViewProps) {
   // 获取暴露度等级和颜色
-  const getExposureInfo = (level: number) => {
-    if (level <= 20) return { label: '安全', color: '#10b981', desc: '你的行踪未被注意' };
-    if (level <= 40) return { label: '警惕', color: '#f59e0b', desc: '有人开始注意你的举动' };
-    if (level <= 60) return { label: '危险', color: '#ef4444', desc: '你已引起怀疑' };
-    return { label: '暴露', color: '#dc2626', desc: '你的身份面临暴露风险' };
+  const getExposureStyle = (value: number) => {
+    if (value <= 20)
+      return { label: "安全", color: "#10b981", desc: "你的行踪未被注意" };
+    if (value <= 40)
+      return { label: "警惕", color: "#f59e0b", desc: "有人开始注意你的举动" };
+    if (value <= 60)
+      return { label: "危险", color: "#ef4444", desc: "你已引起怀疑" };
+    return { label: "暴露", color: "#dc2626", desc: "你的身份面临暴露风险" };
   };
 
-  const exposureInfo = getExposureInfo(gameState.exposureLevel);
+  const exposureStyle = getExposureStyle(exposure.value);
+
+  const formatTime = (minutes: number) => {
+    const h = String(Math.floor(minutes / 60) % 24).padStart(2, "0");
+    const m = String(minutes % 60).padStart(2, "0");
+    return `${h}:${m}`;
+  };
 
   return (
     <div className="h-full overflow-y-auto bg-(--bg-primary) p-8">
@@ -50,9 +60,11 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
         <div
           className="relative rounded-t-xl p-8 border-2"
           style={{
-            background: 'linear-gradient(135deg, rgba(190, 75, 219, 0.15) 0%, rgba(20, 13, 18, 0.3) 100%)',
-            borderColor: 'var(--accent-primary)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.3)',
+            background:
+              "linear-gradient(135deg, rgba(190, 75, 219, 0.15) 0%, rgba(20, 13, 18, 0.3) 100%)",
+            borderColor: "var(--accent-primary)",
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 20px rgba(0,0,0,0.3)",
           }}
         >
           {/* 装饰性边角 */}
@@ -67,16 +79,17 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
               <div
                 className="w-32 h-32 rounded-full flex items-center justify-center border-4"
                 style={{
-                  background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%)',
-                  borderColor: 'var(--accent-primary)',
-                  boxShadow: '0 0 30px rgba(190, 75, 219, 0.3)',
+                  background:
+                    "linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%)",
+                  borderColor: "var(--accent-primary)",
+                  boxShadow: "0 0 30px rgba(190, 75, 219, 0.3)",
                 }}
               >
                 <svg
                   viewBox="0 0 24 24"
                   className="w-16 h-16"
                   fill="currentColor"
-                  style={{ color: 'var(--accent-primary)' }}
+                  style={{ color: "var(--accent-primary)" }}
                 >
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
@@ -85,9 +98,9 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
               <div
                 className="absolute -bottom-2 -right-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
                 style={{
-                  background: 'var(--accent-primary)',
-                  color: 'var(--bg-primary)',
-                  border: '1px solid var(--accent-hover)',
+                  background: "var(--accent-primary)",
+                  color: "var(--bg-primary)",
+                  border: "1px solid var(--accent-hover)",
                 }}
               >
                 侦探
@@ -99,8 +112,8 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
               <h1
                 className="text-4xl font-serif mb-2"
                 style={{
-                  color: 'var(--text-primary)',
-                  textShadow: '0 2px 10px rgba(190, 75, 219, 0.3)',
+                  color: "var(--text-primary)",
+                  textShadow: "0 2px 10px rgba(190, 75, 219, 0.3)",
                 }}
               >
                 雾切响子
@@ -111,14 +124,14 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
 
               {/* 特性标签 */}
               <div className="flex flex-wrap gap-2">
-                {['敏锐观察', '逻辑推理', '冷静沉着'].map((trait) => (
+                {["敏锐观察", "逻辑推理", "冷静沉着"].map((trait) => (
                   <span
                     key={trait}
                     className="px-3 py-1 text-xs rounded border"
                     style={{
-                      background: 'rgba(190, 75, 219, 0.1)',
-                      borderColor: 'rgba(190, 75, 219, 0.3)',
-                      color: 'var(--accent-primary)',
+                      background: "rgba(190, 75, 219, 0.1)",
+                      borderColor: "rgba(190, 75, 219, 0.3)",
+                      color: "var(--accent-primary)",
                     }}
                   >
                     {trait}
@@ -130,18 +143,18 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
         </div>
 
         {/* 档案主体 */}
-        <div
-          className="rounded-b-xl p-8 border-x-2 border-b-2 bg-(--bg-secondary) border-(--border-color)"
-        >
+        <div className="rounded-b-xl p-8 border-x-2 border-b-2 bg-(--bg-secondary) border-(--border-color)">
           {/* 暴露度指示器 - 从顶部栏移过来的 */}
           <div className="mb-8 p-6 rounded-lg border bg-(--bg-tertiary)/80 border-(--border-color)">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-serif text-lg text-(--text-primary)">暴露度</h3>
+              <h3 className="font-serif text-lg text-(--text-primary)">
+                暴露度
+              </h3>
               <span
                 className="text-2xl font-bold"
-                style={{ color: exposureInfo.color }}
+                style={{ color: exposureStyle.color }}
               >
-                {gameState.exposureLevel}%
+                {exposure.value}%
               </span>
             </div>
 
@@ -150,28 +163,51 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{
-                  width: `${gameState.exposureLevel}%`,
-                  background: `linear-gradient(90deg, ${exposureInfo.color}80, ${exposureInfo.color})`,
-                  boxShadow: `0 0 10px ${exposureInfo.color}40`,
+                  width: `${exposure.value}%`,
+                  background: `linear-gradient(90deg, ${exposureStyle.color}80, ${exposureStyle.color})`,
+                  boxShadow: `0 0 10px ${exposureStyle.color}40`,
                 }}
               />
             </div>
 
             <div className="flex items-center justify-between text-sm">
-              <span style={{ color: exposureInfo.color }} className="font-medium">
-                {exposureInfo.label}
+              <span
+                style={{ color: exposureStyle.color }}
+                className="font-medium"
+              >
+                {exposureStyle.label}
               </span>
-              <span className="text-(--text-muted)">{exposureInfo.desc}</span>
+              <span className="text-(--text-muted)">{exposureStyle.desc}</span>
             </div>
           </div>
 
           {/* 属性统计网格 */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { label: '持有线索', value: discoveredCluesCount, icon: '🔍', color: '#be4bdb' },
-              { label: '探索地点', value: `${exploredLocations}/${totalLocations}`, icon: '📍', color: '#3b82f6' },
-              { label: '已对话', value: `${talkedNPCs}人`, icon: '👤', color: '#10b981' },
-              { label: '游戏时间', value: '19:00', icon: '⏰', color: '#f59e0b' },
+              {
+                label: "持有线索",
+                value: discoveredClueCount,
+                icon: "🔍",
+                color: "#be4bdb",
+              },
+              {
+                label: "暴露等级",
+                value: exposure.level,
+                icon: "📍",
+                color: exposureStyle.color,
+              },
+              {
+                label: "暴露度",
+                value: `${exposure.value}%`,
+                icon: "⚠️",
+                color: exposureStyle.color,
+              },
+              {
+                label: "游戏时间",
+                value: formatTime(currentTimeMinute),
+                icon: "⏰",
+                color: "#f59e0b",
+              },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -211,15 +247,23 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
                 <div className="flex items-start gap-3">
                   <span className="text-(--accent-primary) text-lg">◆</span>
                   <div>
-                    <div className="text-(--text-primary) font-medium text-sm">超高校级观察力</div>
-                    <div className="text-(--text-muted) text-xs">能够发现常人忽略的细微线索</div>
+                    <div className="text-(--text-primary) font-medium text-sm">
+                      超高校级观察力
+                    </div>
+                    <div className="text-(--text-muted) text-xs">
+                      能够发现常人忽略的细微线索
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="text-(--accent-primary) text-lg">◆</span>
                   <div>
-                    <div className="text-(--text-primary) font-medium text-sm">逻辑推理</div>
-                    <div className="text-(--text-muted) text-xs">快速串联线索，还原事件真相</div>
+                    <div className="text-(--text-primary) font-medium text-sm">
+                      逻辑推理
+                    </div>
+                    <div className="text-(--text-muted) text-xs">
+                      快速串联线索，还原事件真相
+                    </div>
                   </div>
                 </div>
               </div>
@@ -230,8 +274,9 @@ export function PlayerProfileView({ gameState, onBack }: PlayerProfileViewProps)
           <div
             className="absolute bottom-4 right-4 w-24 h-24 opacity-20 pointer-events-none"
             style={{
-              background: 'radial-gradient(ellipse at center, var(--accent-primary) 0%, transparent 70%)',
-              filter: 'blur(20px)',
+              background:
+                "radial-gradient(ellipse at center, var(--accent-primary) 0%, transparent 70%)",
+              filter: "blur(20px)",
             }}
           />
         </div>

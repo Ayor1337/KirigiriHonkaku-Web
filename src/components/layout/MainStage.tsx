@@ -1,84 +1,109 @@
 // src/components/layout/MainStage.tsx
+import { InvestigationView } from "../views/InvestigationView";
+import { DialogueView } from "../views/DialogueView";
+import { FeedbackView } from "../views/FeedbackView";
+import { DetectiveBoardView } from "../views/DetectiveBoardView";
+import { MapView } from "../views/MapView";
+import { PlayerProfileView } from "../views/PlayerProfileView";
+import type { SceneSnapshot, StateDeltaSummary } from "../../types/api";
+import type { DiscoveredClue } from "../../hooks/useGameSession";
 
-import { InvestigationView } from '../views/InvestigationView';
-import { DialogueView } from '../views/DialogueView';
-import { FeedbackView } from '../views/FeedbackView';
-import { DetectiveBoardView } from '../views/DetectiveBoardView';
-import { MapView } from '../views/MapView';
-import { PlayerProfileView } from '../views/PlayerProfileView';
-import type { GameState, ViewState, NPC, Item, Clue } from '../../types/game';
+type ViewState =
+  | "investigation"
+  | "dialogue"
+  | "feedback"
+  | "board"
+  | "map"
+  | "profile";
 
 interface MainStageProps {
-  gameState: GameState;
   viewState: ViewState;
-  activeNPC?: NPC;
-  investigatedItem?: Item;
-  investigationResult?: {
-    description: string;
-    cluesFound: Clue[];
-    timeAdvanced: number;
-    exposureChange: number;
-  };
-  onSelectNPC: (npc: NPC) => void;
-  onSelectItem: (item: Item) => void;
+  scene: SceneSnapshot;
+  narrativeText?: string | null;
+  lastDelta?: StateDeltaSummary | null;
+  discoveredClues: DiscoveredClue[];
+  activeNpcKey?: string;
+  onTalkNpc: (npcKey: string) => void;
+  onInvestigate: () => void;
+  onMove: (locationKey: string) => void;
   onBackToInvestigation: () => void;
   onFeedbackComplete: () => void;
   onBackFromProfile?: () => void;
+  loading?: boolean;
 }
 
 export function MainStage({
-  gameState,
   viewState,
-  activeNPC,
-  investigatedItem,
-  investigationResult,
-  onSelectNPC,
-  onSelectItem,
+  scene,
+  narrativeText,
+  lastDelta,
+  discoveredClues,
+  activeNpcKey,
+  onTalkNpc,
+  onInvestigate,
+  onMove,
   onBackToInvestigation,
   onFeedbackComplete,
   onBackFromProfile,
+  loading,
 }: MainStageProps) {
+  const details = scene.details;
+
   return (
     <main className="h-full bg-(--bg-primary) overflow-hidden">
-      {viewState === 'investigation' && (
+      {viewState === "investigation" && (
         <InvestigationView
-          gameState={gameState}
-          onSelectNPC={onSelectNPC}
-          onSelectItem={onSelectItem}
+          currentLocation={details.current_location}
+          visibleNpcs={details.visible_npcs}
+          investigableClues={details.investigable_clues}
+          narrativeText={narrativeText}
+          onTalkNpc={onTalkNpc}
+          onInvestigate={onInvestigate}
+          loading={loading}
         />
       )}
 
-      {viewState === 'dialogue' && activeNPC && (
+      {viewState === "dialogue" && (
         <DialogueView
-          npc={activeNPC}
+          activeNpcKey={activeNpcKey}
+          visibleNpcs={details.visible_npcs}
+          narrativeText={narrativeText}
+          latestDialogue={details.latest_dialogue}
           onBack={onBackToInvestigation}
         />
       )}
 
-      {viewState === 'feedback' && investigatedItem && investigationResult && (
+      {viewState === "feedback" && (
         <FeedbackView
-          item={investigatedItem}
-          result={investigationResult}
+          narrativeText={narrativeText}
+          lastDelta={lastDelta}
           onComplete={onFeedbackComplete}
         />
       )}
 
-      {viewState === 'board' && (
+      {viewState === "board" && (
         <DetectiveBoardView
-          gameState={gameState}
+          discoveredClues={discoveredClues}
+          currentLocation={details.current_location}
+          visibleNpcs={details.visible_npcs}
           onBack={onBackToInvestigation}
         />
       )}
 
-      {viewState === 'map' && (
+      {viewState === "map" && (
         <MapView
-          onSelectLocation={(tile) => console.log('Selected location:', tile)}
+          currentLocation={details.current_location}
+          reachableLocations={details.reachable_locations}
+          onMove={onMove}
+          loading={loading}
         />
       )}
 
-      {viewState === 'profile' && (
+      {viewState === "profile" && (
         <PlayerProfileView
-          gameState={gameState}
+          exposure={details.exposure}
+          discoveredClueCount={discoveredClues.length}
+          currentTimeMinute={scene.current_time_minute}
           onBack={onBackFromProfile || onBackToInvestigation}
         />
       )}

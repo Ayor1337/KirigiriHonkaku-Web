@@ -1,82 +1,76 @@
 // src/components/views/DetectiveBoardView.tsx
-import { useState, useCallback } from 'react';
-import { InkButton } from '../ui/InkButton';
-import { BoardCanvas } from './board/BoardCanvas';
-import { BoardToolbar } from './board/BoardToolbar';
-import type { GameState } from '../../types/game';
-import type { BoardElement, BoardConnection } from '../../types/board';
-import '../../styles/board.css';
+import { useState, useCallback } from "react";
+import { InkButton } from "../ui/InkButton";
+import { BoardCanvas } from "./board/BoardCanvas";
+import { BoardToolbar } from "./board/BoardToolbar";
+import type { SceneLocation, VisibleNpc } from "../../types/api";
+import type { DiscoveredClue } from "../../hooks/useGameSession";
+import type { BoardElement, BoardConnection } from "../../types/board";
+import "../../styles/board.css";
 
 interface DetectiveBoardViewProps {
-  gameState: GameState;
+  discoveredClues: DiscoveredClue[];
+  currentLocation: SceneLocation;
+  visibleNpcs: VisibleNpc[];
   onBack: () => void;
 }
 
-export function DetectiveBoardView({ gameState, onBack }: DetectiveBoardViewProps) {
+export function DetectiveBoardView({
+  discoveredClues,
+  currentLocation,
+  visibleNpcs,
+  onBack,
+}: DetectiveBoardViewProps) {
   const [connections, setConnections] = useState<BoardConnection[]>([]);
 
-  // 初始化元素 - 从游戏状态转换
-  // 使用伪随机数（基于索引）保证可重现性
   const [elements, setElements] = useState<BoardElement[]>(() => {
     const newElements: BoardElement[] = [];
 
-    // 添加已发现的线索 - 伪随机散落位置
-    gameState.discoveredClues.forEach((clue, index) => {
-      // 使用基于索引的伪随机偏移
-      const offsetX = ((index * 17) % 50); // 0-49 的伪随机数
-      const offsetY = ((index * 31) % 50);
-      const rotation = ((index * 7) % 8) - 4; // -4 到 4 度
+    // 添加已发现的线索
+    discoveredClues.forEach((clue, index) => {
+      const offsetX = (index * 17) % 50;
+      const offsetY = (index * 31) % 50;
+      const rotation = ((index * 7) % 8) - 4;
 
       newElements.push({
-        id: `clue-${clue.id}`,
-        type: 'clue',
+        id: `clue-${clue.key}`,
+        type: "clue",
         x: 100 + (index % 3) * 250 + offsetX,
         y: 100 + Math.floor(index / 3) * 150 + offsetY,
-        title: clue.title,
-        content: clue.summary,
-        sourceId: clue.id,
-        createdAt: clue.discoveredAt,
+        title: clue.name,
+        content: clue.clue_type,
+        sourceId: clue.key,
+        createdAt: new Date(),
         rotation,
       });
     });
 
     // 添加当前地点
     newElements.push({
-      id: 'location-current',
-      type: 'location',
+      id: "location-current",
+      type: "location",
       x: 600,
       y: 100,
-      title: gameState.currentLocation.name,
-      content: gameState.currentLocation.description.slice(0, 60) + '...',
+      title: currentLocation.name,
+      content: (currentLocation.description ?? "").slice(0, 60) + "...",
       createdAt: new Date(),
       rotation: -1,
     });
 
-    // 添加在场人物
-    gameState.presentNPCs.forEach((npc, index) => {
-      const rotation = ((index * 13) % 6) - 3; // -3 到 3 度
+    // 添加可见人物
+    visibleNpcs.forEach((npc, index) => {
+      const rotation = ((index * 13) % 6) - 3;
       newElements.push({
-        id: `npc-${npc.id}`,
-        type: 'npc',
+        id: `npc-${npc.key}`,
+        type: "npc",
         x: 150 + index * 200,
         y: 400,
-        title: npc.name,
-        content: npc.title,
-        sourceId: npc.id,
+        title: npc.display_name,
+        content: "",
+        sourceId: npc.key,
         createdAt: new Date(),
         rotation,
       });
-    });
-
-    // 添加时间
-    newElements.push({
-      id: 'time-current',
-      type: 'time',
-      x: 50,
-      y: 50,
-      title: '时间',
-      content: gameState.timePeriod,
-      createdAt: new Date(),
     });
 
     return newElements;
@@ -86,27 +80,27 @@ export function DetectiveBoardView({ gameState, onBack }: DetectiveBoardViewProp
   const handleAddNote = useCallback(() => {
     const timestamp = Date.now();
     // 使用 timestamp 生成伪随机偏移
-    const offsetX = (timestamp % 200);
-    const offsetY = ((timestamp >> 3) % 150);
-    const rotation = ((timestamp % 12) - 6); // -6 到 6 度
+    const offsetX = timestamp % 200;
+    const offsetY = (timestamp >> 3) % 150;
+    const rotation = (timestamp % 12) - 6; // -6 到 6 度
 
     const newNote: BoardElement = {
       id: `note-${timestamp}`,
-      type: 'note',
+      type: "note",
       x: 300 + offsetX,
       y: 200 + offsetY,
-      title: '',
-      content: '',
+      title: "",
+      content: "",
       createdAt: new Date(),
       rotation,
     };
-    setElements(prev => [...prev, newNote]);
+    setElements((prev) => [...prev, newNote]);
   }, []);
 
   // 清空画布
   const handleClearBoard = useCallback(() => {
     // 保留初始化的线索、地点、人物、时间，只删除玩家添加的便利贴和连接
-    setElements(prev => prev.filter(el => el.type !== 'note'));
+    setElements((prev) => prev.filter((el) => el.type !== "note"));
     setConnections([]);
   }, []);
 
