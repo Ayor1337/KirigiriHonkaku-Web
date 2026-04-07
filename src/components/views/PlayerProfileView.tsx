@@ -1,9 +1,10 @@
 // src/components/views/PlayerProfileView.tsx
 // 玩家个人资料页面 - 维多利亚档案柜风格
 
-import type { ExposureInfo } from "../../types/api";
+import type { ExposureInfo, SessionPlayer } from "../../types/api";
 
 interface PlayerProfileViewProps {
+  playerProfile: SessionPlayer | null;
   exposure: ExposureInfo;
   discoveredClueCount: number;
   currentTimeMinute: number;
@@ -11,6 +12,7 @@ interface PlayerProfileViewProps {
 }
 
 export function PlayerProfileView({
+  playerProfile,
   exposure,
   discoveredClueCount,
   currentTimeMinute,
@@ -34,6 +36,18 @@ export function PlayerProfileView({
     const m = String(minutes % 60).padStart(2, "0");
     return `${h}:${m}`;
   };
+
+  const displayName = playerProfile?.display_name || "未知侦探";
+  const publicIdentity = playerProfile?.public_identity || "侦探";
+  const traitText = playerProfile?.trait_text || "";
+  const traits = traitText
+    ? traitText
+        .split(/[,，、]/)
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : [];
+  const backgroundText =
+    playerProfile?.background_text || "暂无背景资料";
 
   return (
     <div className="h-full overflow-y-auto bg-(--bg-primary) p-8">
@@ -103,7 +117,7 @@ export function PlayerProfileView({
                   border: "1px solid var(--accent-hover)",
                 }}
               >
-                侦探
+                {playerProfile?.template_name || "侦探"}
               </div>
             </div>
 
@@ -116,28 +130,30 @@ export function PlayerProfileView({
                   textShadow: "0 2px 10px rgba(190, 75, 219, 0.3)",
                 }}
               >
-                雾切响子
+                {displayName}
               </h1>
               <p className="text-(--accent-primary) font-serif text-lg mb-4 tracking-wide">
-                超高校级的侦探
+                {publicIdentity}
               </p>
 
               {/* 特性标签 */}
-              <div className="flex flex-wrap gap-2">
-                {["敏锐观察", "逻辑推理", "冷静沉着"].map((trait) => (
-                  <span
-                    key={trait}
-                    className="px-3 py-1 text-xs rounded border"
-                    style={{
-                      background: "rgba(190, 75, 219, 0.1)",
-                      borderColor: "rgba(190, 75, 219, 0.3)",
-                      color: "var(--accent-primary)",
-                    }}
-                  >
-                    {trait}
-                  </span>
-                ))}
-              </div>
+              {traits.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {traits.map((trait) => (
+                    <span
+                      key={trait}
+                      className="px-3 py-1 text-xs rounded border"
+                      style={{
+                        background: "rgba(190, 75, 219, 0.1)",
+                        borderColor: "rgba(190, 75, 219, 0.3)",
+                        color: "var(--accent-primary)",
+                      }}
+                    >
+                      {trait}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -228,40 +244,8 @@ export function PlayerProfileView({
                 人物背景
               </h3>
               <p className="text-(--text-secondary) leading-relaxed text-sm pl-10">
-                曾在苏格兰场工作的传奇侦探，以敏锐的观察力和超凡的逻辑推理能力闻名。
-                被称为"希望的侦探"，解决过多起悬案。本次受邀调查雾切洋馆的神秘事件。
+                {backgroundText}
               </p>
-            </div>
-
-            <div>
-              <h3 className="font-serif text-lg text-(--text-primary) mb-3 flex items-center gap-2">
-                <span className="w-8 h-px bg-(--accent-primary)" />
-                特殊能力
-              </h3>
-              <div className="pl-10 space-y-2">
-                <div className="flex items-start gap-3">
-                  <span className="text-(--accent-primary) text-lg">◆</span>
-                  <div>
-                    <div className="text-(--text-primary) font-medium text-sm">
-                      超高校级观察力
-                    </div>
-                    <div className="text-(--text-muted) text-xs">
-                      能够发现常人忽略的细微线索
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-(--accent-primary) text-lg">◆</span>
-                  <div>
-                    <div className="text-(--text-primary) font-medium text-sm">
-                      逻辑推理
-                    </div>
-                    <div className="text-(--text-muted) text-xs">
-                      快速串联线索，还原事件真相
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 

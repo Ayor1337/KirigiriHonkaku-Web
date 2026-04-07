@@ -2,7 +2,7 @@
 interface TimeDisplayProps {
   date: Date;
   timePeriod: string;
-  weather: string;
+  weather?: string;
 }
 
 export function TimeDisplay({ date, timePeriod, weather }: TimeDisplayProps) {
@@ -28,8 +28,12 @@ export function TimeDisplay({ date, timePeriod, weather }: TimeDisplayProps) {
         <span>{formatTime(date)}</span>
         <span className="text-(--border-color)">|</span>
         <span>{timePeriod}</span>
-        <span className="text-(--border-color)">|</span>
-        <span>{weather}</span>
+        {weather && (
+          <>
+            <span className="text-(--border-color)">|</span>
+            <span>{weather}</span>
+          </>
+        )}
       </div>
     </div>
   );

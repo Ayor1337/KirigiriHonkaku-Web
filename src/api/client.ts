@@ -3,6 +3,10 @@
 
 import type {
   SessionResponse,
+  SessionStateResponse,
+  SessionPlayer,
+  SessionMap,
+  SessionNpc,
   SessionBootstrapErrorEvent,
   SessionBootstrapResponse,
   SessionBootstrapStageEvent,
@@ -170,6 +174,34 @@ function parseSseBlock(block: string): ParsedSseEvent | null {
 export function getSession(sessionId: string): Promise<SessionResponse> {
   return request<SessionResponse>(
     `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}`,
+  );
+}
+
+/** 读取会话状态（暴露度） */
+export function getSessionState(sessionId: string): Promise<SessionStateResponse> {
+  return request<SessionStateResponse>(
+    `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/state`,
+  );
+}
+
+/** 读取会话玩家详情 */
+export function getSessionPlayer(sessionId: string): Promise<SessionPlayer> {
+  return request<SessionPlayer>(
+    `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/player`,
+  );
+}
+
+/** 读取会话地图详情 */
+export function getSessionMap(sessionId: string): Promise<SessionMap> {
+  return request<SessionMap>(
+    `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/map`,
+  );
+}
+
+/** 读取会话已遇见的 NPC 列表 */
+export function getSessionNPCs(sessionId: string): Promise<SessionNpc[]> {
+  return request<SessionNpc[]>(
+    `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/npcs`,
   );
 }
 

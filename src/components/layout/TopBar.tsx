@@ -7,6 +7,7 @@ interface TopBarProps {
   currentTimeMinute: number;
   exposure: ExposureInfo;
   narrativeText?: string | null;
+  weather?: string;
 }
 
 /** 将游戏分钟数转为等效 Date（用于 TimeDisplay 兼容） */
@@ -28,6 +29,7 @@ export function TopBar({
   currentTimeMinute,
   exposure,
   narrativeText,
+  weather,
 }: TopBarProps) {
   const date = minuteToDate(currentTimeMinute);
   const timePeriod = getTimePeriod(currentTimeMinute);
@@ -35,7 +37,7 @@ export function TopBar({
   return (
     <header className="h-15 bg-(--bg-secondary) border-b border-(--border-color) px-6 flex items-center justify-between shrink-0">
       {/* 左侧：时间 */}
-      <TimeDisplay date={date} timePeriod={timePeriod} weather="雨" />
+      <TimeDisplay date={date} timePeriod={timePeriod} weather={weather} />
 
       {/* 中间：局势提示 / narrative */}
       <div className="hidden md:flex items-center max-w-md px-6">

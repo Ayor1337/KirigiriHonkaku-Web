@@ -2,7 +2,13 @@
 // 游戏会话状态管理 — 封装 API 调用和场景状态
 
 import { useState, useCallback, useRef } from "react";
-import { bootstrapSessionStream, submitAction } from "../api/client";
+import {
+  bootstrapSessionStream,
+  submitAction,
+  getSessionPlayer,
+  getSessionMap,
+  getSessionNPCs,
+} from "../api/client";
 import type {
   SceneSnapshot,
   StateDeltaSummary,
@@ -10,6 +16,9 @@ import type {
   InvestigableClue,
   SessionBootstrapStageEvent,
   SessionBootstrapStageKey,
+  SessionPlayer,
+  SessionMap,
+  SessionNpc,
 } from "../types/api";
 
 /** 已发现线索记录（前端累积追踪） */
@@ -38,6 +47,9 @@ interface GameSessionState {
   error: string | null;
   creationStageKey: SessionBootstrapStageKey | null;
   creationStageMeta: SessionBootstrapStageEvent | null;
+  playerProfile: SessionPlayer | null;
+  mapData: SessionMap | null;
+  npcs: SessionNpc[];
 }
 
 // Step 6: 模板选择已移除，会话创建改为空请求体，世界由 AGENT 生成
@@ -55,6 +67,9 @@ export function useGameSession() {
     error: null,
     creationStageKey: null,
     creationStageMeta: null,
+    playerProfile: null,
+    mapData: null,
+    npcs: [],
   });
 
   // actor_id 需要在多次 action 间保持一致
@@ -127,6 +142,17 @@ export function useGameSession() {
           };
         });
 
+        // 异步刷新已遇见 NPC 列表（talk/investigate 等动作可能改变 has_met_player）
+        if (sessionIdRef.current) {
+          getSessionNPCs(sessionIdRef.current)
+            .then((npcs) => {
+              setState((prev) => ({ ...prev, npcs }));
+            })
+            .catch(() => {
+              // 忽略刷新失败
+            });
+        }
+
         return result;
       } catch (err) {
         const message = err instanceof Error ? err.message : "请求失败";
@@ -183,6 +209,20 @@ export function useGameSession() {
 
       const currentLoc = result.scene_snapshot.details.current_location;
 
+      // 同时拉取玩家资料、完整地图与已遇见 NPC 列表
+      let playerProfile: SessionPlayer | null = null;
+      let mapData: SessionMap | null = null;
+      let npcs: SessionNpc[] = [];
+      try {
+        [playerProfile, mapData, npcs] = await Promise.all([
+          getSessionPlayer(sessionId),
+          getSessionMap(sessionId),
+          getSessionNPCs(sessionId),
+        ]);
+      } catch {
+        // 获取元数据失败不影响主流程
+      }
+
       setState((prev) => ({
         ...prev,
         scene: result.scene_snapshot,
@@ -206,6 +246,9 @@ export function useGameSession() {
         error: null,
         creationStageKey: null,
         creationStageMeta: null,
+        playerProfile: playerProfile ?? null,
+        mapData: mapData ?? null,
+        npcs: npcs ?? [],
       }));
 
       return { sessionId, playerId };
@@ -239,6 +282,17 @@ export function useGameSession() {
 
       try {
         await doAction("investigate", {});
+        const [playerProfile, mapData, npcs] = await Promise.all([
+          getSessionPlayer(sessionId),
+          getSessionMap(sessionId),
+          getSessionNPCs(sessionId),
+        ]);
+        setState((prev) => ({
+          ...prev,
+          playerProfile: playerProfile ?? null,
+          mapData: mapData ?? null,
+          npcs: npcs ?? [],
+        }));
       } catch (err) {
         const message = err instanceof Error ? err.message : "恢复游戏失败";
         setState((prev) => ({ ...prev, loading: false, error: message }));

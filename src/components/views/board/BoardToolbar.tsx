@@ -18,7 +18,7 @@ export function BoardToolbar({ onAddNote, onClearBoard }: BoardToolbarProps) {
         className="toolbar-btn"
         title="清空画布"
         onClick={() => {
-          if (confirm('确定要清空侦探板吗？所有手动添加的便利贴和连接将被删除。')) {
+          if (confirm('确定要清空线索板吗？所有手动添加的便利贴和连接将被删除。')) {
             onClearBoard();
           }
         }}

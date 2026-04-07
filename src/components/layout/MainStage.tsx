@@ -6,7 +6,13 @@ import { FeedbackView } from "../views/FeedbackView";
 import { DetectiveBoardView } from "../views/DetectiveBoardView";
 import { MapView } from "../views/MapView";
 import { PlayerProfileView } from "../views/PlayerProfileView";
-import type { SceneSnapshot, StateDeltaSummary } from "../../types/api";
+import type {
+  SceneSnapshot,
+  StateDeltaSummary,
+  SessionPlayer,
+  SessionMap,
+  SessionNpc,
+} from "../../types/api";
 import type { DiscoveredClue } from "../../hooks/useGameSession";
 
 type ViewState =
@@ -24,6 +30,9 @@ interface MainStageProps {
   lastDelta?: StateDeltaSummary | null;
   discoveredClues: DiscoveredClue[];
   activeNpcKey?: string;
+  playerProfile: SessionPlayer | null;
+  mapData: SessionMap | null;
+  npcs?: SessionNpc[];
   onTalkNpc: (npcKey: string) => void;
   onInvestigate: () => void;
   onMove: (locationKey: string) => void;
@@ -40,6 +49,9 @@ export function MainStage({
   lastDelta,
   discoveredClues,
   activeNpcKey,
+  playerProfile,
+  mapData,
+  npcs,
   onTalkNpc,
   onInvestigate,
   onMove,
@@ -94,7 +106,7 @@ export function MainStage({
         <DetectiveBoardView
           discoveredClues={discoveredClues}
           currentLocation={details.current_location}
-          visibleNpcs={details.visible_npcs}
+          npcs={npcs ?? []}
           onBack={onBackToInvestigation}
         />
       )}
@@ -103,6 +115,14 @@ export function MainStage({
         <MapView
           currentLocation={details.current_location}
           reachableLocations={details.reachable_locations}
+          mapSnapshot={details.map_snapshot}
+          knownLocations={
+            mapData?.locations.map((loc) => ({
+              key: loc.key,
+              name: loc.name,
+            })) ?? undefined
+          }
+          mapName={mapData?.display_name ?? undefined}
           onMove={onMove}
           loading={loading}
         />
@@ -110,6 +130,7 @@ export function MainStage({
 
       {viewState === "profile" && (
         <PlayerProfileView
+          playerProfile={playerProfile}
           exposure={details.exposure}
           discoveredClueCount={discoveredClues.length}
           currentTimeMinute={scene.current_time_minute}

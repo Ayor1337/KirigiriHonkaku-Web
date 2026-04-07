@@ -137,6 +137,7 @@ export function InvestigationLayout() {
         currentTimeMinute={scene.current_time_minute}
         exposure={details.exposure}
         narrativeText={game.narrativeText}
+        weather={details.weather ?? undefined}
       />
 
       {/* 中间三栏 */}
@@ -165,6 +166,9 @@ export function InvestigationLayout() {
           lastDelta={game.lastDelta}
           discoveredClues={game.discoveredClues}
           activeNpcKey={activeNpcKey}
+          playerProfile={game.playerProfile}
+          mapData={game.mapData}
+          npcs={game.npcs}
           onTalkNpc={handleTalkNpc}
           onInvestigate={handleInvestigate}
           onMove={handleMove}
@@ -176,12 +180,20 @@ export function InvestigationLayout() {
 
         {/* 右侧案情列 */}
         <CaseColumn
+          viewState={viewState}
           visibleNpcs={details.visible_npcs}
           discoveredClues={game.discoveredClues}
           newClueKeys={newClueKeys}
           onTalkNpc={handleTalkNpc}
           narrativeText={game.narrativeText}
           loading={game.loading}
+          currentLocation={details.current_location}
+          reachableLocations={details.reachable_locations}
+          npcs={game.npcs}
+          weather={details.weather}
+          discoveredClueCount={game.discoveredClues.length}
+          visitedLocationCount={game.visitedLocations.length}
+          exposureLevel={details.exposure.level}
         />
       </div>
 

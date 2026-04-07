@@ -265,7 +265,7 @@ export interface KnowledgeEntry {
 }
 
 /**
- * DetectiveBoard - 玩家唯一的侦探板实体
+ * DetectiveBoard - 玩家唯一的线索板实体
  */
 export interface DetectiveBoard {
   // 标识信息
@@ -280,12 +280,12 @@ export interface DetectiveBoard {
 }
 
 /**
- * BoardItemTargetType - 侦探板卡片允许引用的目标类型
+ * BoardItemTargetType - 线索板卡片允许引用的目标类型
  */
 export type BoardItemTargetType = 'npc' | 'location' | 'clue' | 'event';
 
 /**
- * BoardItem - 侦探板上的卡片
+ * BoardItem - 线索板上的卡片
  */
 export interface BoardItem {
   // 标识信息
@@ -328,7 +328,7 @@ export interface BoardLink {
 }
 
 /**
- * BoardNote - 侦探板上的自由备注
+ * BoardNote - 线索板上的自由备注
  */
 export interface BoardNote {
   // 标识信息

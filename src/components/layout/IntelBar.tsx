@@ -38,13 +38,13 @@ export function IntelBar({
     },
     {
       id: "board",
-      label: "侦探板",
+      label: "线索板",
       badge: connectableClues > 0 ? connectableClues : undefined,
       view: "board" as ViewState,
     },
     {
       id: "records",
-      label: "对话记录",
+      label: "对话",
       view: "dialogue" as ViewState,
     },
   ];

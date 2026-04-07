@@ -25,6 +25,70 @@ export interface ActionRequest {
 // 响应类型 — 会话
 // ============================================
 
+export interface SessionPlayer {
+  id: string;
+  character_id: string;
+  display_name: string;
+  public_identity: string | null;
+  template_key: string | null;
+  template_name: string | null;
+  trait_text: string | null;
+  background_text: string | null;
+  current_location_id: string | null;
+  current_location_name: string | null;
+  exposure_value: number;
+  exposure_level: string;
+}
+
+export interface SessionMapLocation {
+  id: string;
+  key: string;
+  parent_location_id: string | null;
+  name: string;
+  description: string | null;
+  location_type: string | null;
+  visibility_level: string | null;
+  is_hidden: boolean;
+  status_flags: Record<string, unknown>;
+}
+
+export interface SessionMapConnection {
+  id: string;
+  from_location_id: string;
+  to_location_id: string;
+  connection_type: string | null;
+  access_rule: Record<string, unknown>;
+  is_hidden: boolean;
+  is_locked: boolean;
+  is_one_way: boolean;
+  is_dangerous: boolean;
+  time_window_rule: Record<string, unknown>;
+}
+
+export interface SessionMap {
+  id: string;
+  template_key: string | null;
+  display_name: string | null;
+  locations: SessionMapLocation[];
+  connections: SessionMapConnection[];
+}
+
+export interface SessionNpc {
+  id: string;
+  character_id: string;
+  template_key: string | null;
+  display_name: string;
+  public_identity: string | null;
+  current_location_id: string | null;
+  current_location_name: string | null;
+  has_met_player: boolean;
+}
+
+export interface SessionStateResponse {
+  exposure_value: number;
+  exposure_level: string;
+}
+
 export interface SessionResponse {
   id: string;
   uuid: string;
@@ -88,6 +152,28 @@ export interface ReachableLocation {
   name: string;
 }
 
+export interface SceneMapLocation {
+  key: string;
+  name: string;
+  view_x: number;
+  view_y: number;
+  view_icon: string;
+  is_locked: boolean;
+}
+
+export interface SceneMapConnection {
+  from_key: string;
+  to_key: string;
+  connection_type: string | null;
+  is_locked: boolean;
+}
+
+export interface SceneMapSnapshot {
+  map_name: string;
+  locations: SceneMapLocation[];
+  connections: SceneMapConnection[];
+}
+
 export interface VisibleNpc {
   key: string;
   display_name: string;
@@ -139,6 +225,8 @@ export interface SceneDetails {
   public_context: PublicContext;
   risk: RiskInfo;
   exposure: ExposureInfo;
+  map_snapshot: SceneMapSnapshot | null;
+  weather: string | null;
 }
 
 export interface SceneSnapshot {

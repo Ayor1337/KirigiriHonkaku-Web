@@ -3,7 +3,11 @@
 
 import { useMemo, useCallback, useState } from 'react';
 import { LoadingOverlay } from '../ui/LoadingOverlay';
-import type { SceneLocation, ReachableLocation } from '../../types/api';
+import type {
+  SceneLocation,
+  ReachableLocation,
+  SceneMapSnapshot,
+} from '../../types/api';
 
 interface ViewNode {
   id: string;
@@ -13,9 +17,17 @@ interface ViewNode {
   icon: string;
 }
 
+interface KnownLocationInfo {
+  key: string;
+  name: string;
+}
+
 interface MapViewProps {
   currentLocation: SceneLocation;
   reachableLocations: ReachableLocation[];
+  mapSnapshot?: SceneMapSnapshot | null;
+  knownLocations?: KnownLocationInfo[];
+  mapName?: string;
   onMove: (locationKey: string) => void;
   loading?: boolean;
 }
@@ -56,10 +68,64 @@ function curvedPath(x1: number, y1: number, x2: number, y2: number, bend = 0.25)
 export function MapView({
   currentLocation,
   reachableLocations,
+  mapSnapshot,
+  knownLocations,
+  mapName,
   onMove,
   loading,
 }: MapViewProps) {
   const allNodes = useMemo((): ViewNode[] => {
+    if (mapSnapshot?.locations && mapSnapshot.locations.length > 0) {
+      const current = mapSnapshot.locations.find(
+        (loc) => loc.key === currentLocation.key,
+      );
+      const offsetX = current ? current.view_x : 0;
+      const offsetY = current ? current.view_y : 0;
+
+      return mapSnapshot.locations.map((loc) => ({
+        id: loc.key,
+        x: loc.view_x - offsetX,
+        y: loc.view_y - offsetY,
+        label: loc.name,
+        icon: loc.view_icon || '',
+      }));
+    }
+
+    // Use knownLocations from GET /sessions/{id} to render full map when snapshot coordinates are unavailable
+    if (knownLocations && knownLocations.length > 0) {
+      const nodes: ViewNode[] = [
+        {
+          id: currentLocation.key,
+          x: 0,
+          y: 0,
+          label: currentLocation.name,
+          icon: '',
+        },
+      ];
+
+      const others = knownLocations.filter((k) => k.key !== currentLocation.key);
+      const count = others.length;
+      const baseStep = count > 0 ? (2 * Math.PI) / count : 0;
+
+      others.forEach((loc, i) => {
+        const h = hashFromString(loc.key);
+        const radius = 130 + h * 110;
+        const jitter = (h - 0.5) * 1.22;
+        const angle = i * baseStep - Math.PI / 2 + jitter;
+
+        nodes.push({
+          id: loc.key,
+          x: Math.cos(angle) * radius,
+          y: Math.sin(angle) * radius,
+          label: loc.name,
+          icon: '',
+        });
+      });
+
+      return nodes;
+    }
+
+    // Fallback: legacy organic ring layout (current + reachable only)
     const nodes: ViewNode[] = [
       {
         id: currentLocation.key,
@@ -75,10 +141,8 @@ export function MapView({
 
     reachableLocations.forEach((r, i) => {
       const h = hashFromString(r.key);
-      // Distance varies between 130 and 240 for organic spread
       const radius = 130 + h * 110;
-      // Angle jitters ±35° around the base slice
-      const jitter = (h - 0.5) * 1.22; // radians ~ ±35°
+      const jitter = (h - 0.5) * 1.22;
       const angle = i * baseStep - Math.PI / 2 + jitter;
 
       nodes.push({
@@ -86,14 +150,33 @@ export function MapView({
         x: Math.cos(angle) * radius,
         y: Math.sin(angle) * radius,
         label: r.name,
-        icon: '◆',
+        icon: '',
       });
     });
 
     return nodes;
-  }, [currentLocation, reachableLocations]);
+  }, [currentLocation, reachableLocations, mapSnapshot, knownLocations]);
 
   const connections = useMemo(() => {
+    if (mapSnapshot?.connections && mapSnapshot.connections.length > 0) {
+      const connList: { id: string; d: string; isLocked: boolean }[] = [];
+      mapSnapshot.connections.forEach((conn) => {
+        const from = allNodes.find((n) => n.id === conn.from_key);
+        const to = allNodes.find((n) => n.id === conn.to_key);
+        if (from && to) {
+          const h = hashFromString(`${conn.from_key}-${conn.to_key}`);
+          const bend = (h - 0.5) * 0.25;
+          connList.push({
+            id: `conn-${conn.from_key}-${conn.to_key}`,
+            d: curvedPath(from.x, from.y, to.x, to.y, bend),
+            isLocked: conn.is_locked,
+          });
+        }
+      });
+      return { spokes: connList, web: [] };
+    }
+
+    // Fallback: legacy star + web layout
     const center = allNodes[0];
     const spokes = reachableLocations.map((r) => {
       const target = allNodes.find((n) => n.id === r.key)!;
@@ -102,30 +185,32 @@ export function MapView({
       return {
         id: `spoke-${r.key}`,
         d: curvedPath(center.x, center.y, target.x, target.y, bend),
+        isLocked: false,
       };
     });
 
-    const web: { id: string; d: string }[] = [];
+    const web: { id: string; d: string; isLocked: boolean }[] = [];
     // Connect some reachable nodes to each other when they are close enough
-    const reachables = allNodes.slice(1);
-    for (let i = 0; i < reachables.length; i++) {
-      for (let j = i + 1; j < reachables.length; j++) {
-        const a = reachables[i];
-        const b = reachables[j];
+    const nonCenter = allNodes.slice(1);
+    for (let i = 0; i < nonCenter.length; i++) {
+      for (let j = i + 1; j < nonCenter.length; j++) {
+        const a = nonCenter[i];
+        const b = nonCenter[j];
         const dist = Math.hypot(a.x - b.x, a.y - b.y);
         const h = hashFromString(`web-${a.id}-${b.id}`);
         if (dist < 260 && h > 0.35) {
-          const bend = ((h * 2) - 1) * 0.2;
+          const bend = (h * 2 - 1) * 0.2;
           web.push({
             id: `web-${a.id}-${b.id}`,
             d: curvedPath(a.x, a.y, b.x, b.y, bend),
+            isLocked: false,
           });
         }
       }
     }
 
     return { spokes, web };
-  }, [allNodes, reachableLocations]);
+  }, [allNodes, reachableLocations, mapSnapshot]);
 
   const reachableSet = useMemo(
     () => new Set(reachableLocations.map((r) => r.key)),
@@ -158,7 +243,9 @@ export function MapView({
       {/* Floating header overlay */}
       <div className="absolute top-5 left-5 z-10 pointer-events-none">
         <h2 className="text-[10px] text-(--text-muted) uppercase tracking-[0.3em]">地图</h2>
-        <h1 className="font-serif text-2xl text-(--text-primary) mt-1">雾切洋馆</h1>
+        <h1 className="font-serif text-2xl text-(--text-primary) mt-1">
+          {mapSnapshot?.map_name || mapName || '未知地图'}
+        </h1>
       </div>
 
       <svg
@@ -265,6 +352,7 @@ export function MapView({
           {allNodes.map((node) => {
             const isCurrent = node.id === currentLocation.key;
             const isReachable = reachableSet.has(node.id) && !isCurrent;
+            const isUnreachable = !isCurrent && !isReachable;
 
             const isHovered = hoveredNodeId === node.id;
 
@@ -280,13 +368,39 @@ export function MapView({
                 {/* Current node: slow breathing halo */}
                 {isCurrent && (
                   <>
-                    <circle r="22" fill="none" stroke="var(--accent-primary)" strokeOpacity="0.15" strokeWidth="1">
-                      <animate attributeName="r" values="22;36;22" dur="4s" repeatCount="indefinite" />
-                      <animate attributeName="stroke-opacity" values="0.2;0;0.2" dur="4s" repeatCount="indefinite" />
+                    <circle
+                      r="22"
+                      fill="none"
+                      stroke="var(--accent-primary)"
+                      strokeOpacity="0.15"
+                      strokeWidth="1"
+                    >
+                      <animate
+                        attributeName="r"
+                        values="22;36;22"
+                        dur="4s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="stroke-opacity"
+                        values="0.2;0;0.2"
+                        dur="4s"
+                        repeatCount="indefinite"
+                      />
                     </circle>
                     <circle r="14" fill="var(--accent-primary)" opacity="0.25">
-                      <animate attributeName="r" values="14;22;14" dur="2s" repeatCount="indefinite" />
-                      <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite" />
+                      <animate
+                        attributeName="r"
+                        values="14;22;14"
+                        dur="2s"
+                        repeatCount="indefinite"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.3;0;0.3"
+                        dur="2s"
+                        repeatCount="indefinite"
+                      />
                     </circle>
                   </>
                 )}
@@ -308,14 +422,18 @@ export function MapView({
                   fill={
                     isCurrent
                       ? 'var(--accent-primary)'
-                      : isHovered
-                        ? 'var(--bg-tertiary)'
-                        : 'var(--bg-secondary)'
+                      : isReachable
+                        ? isHovered
+                          ? 'var(--bg-tertiary)'
+                          : 'var(--bg-secondary)'
+                        : '#4b5563'
                   }
                   stroke={
                     isCurrent
                       ? 'var(--text-primary)'
-                      : 'var(--accent-primary)'
+                      : isReachable
+                        ? 'var(--accent-primary)'
+                        : '#6b7280'
                   }
                   strokeWidth={isCurrent ? 2.5 : isHovered ? 2.5 : 2}
                   className="transition-all duration-300 ease-out"
@@ -337,7 +455,7 @@ export function MapView({
                   textAnchor="middle"
                   className="text-[10px] pointer-events-none select-none"
                   style={{
-                    fill: isCurrent ? '#ffffff' : 'var(--text-secondary)',
+                    fill: isCurrent ? '#ffffff' : isUnreachable ? '#9ca3af' : 'var(--text-secondary)',
                   }}
                 >
                   {node.icon}
@@ -349,7 +467,7 @@ export function MapView({
                   textAnchor="middle"
                   className="text-[10px] font-serif pointer-events-none select-none transition-all duration-300 ease-out"
                   style={{
-                    fill: 'var(--text-primary)',
+                    fill: isUnreachable ? '#9ca3af' : 'var(--text-primary)',
                     textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 2px var(--bg-primary)',
                   }}
                 >

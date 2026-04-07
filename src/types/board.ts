@@ -1,5 +1,5 @@
 // src/types/board.ts
-// 侦探板（Mind Place）类型定义
+// 线索板（Mind Place）类型定义
 
 export type BoardElementType = 'clue' | 'npc' | 'location' | 'time' | 'note';
 

@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 import { InkButton } from "../ui/InkButton";
 import { BoardCanvas } from "./board/BoardCanvas";
 import { BoardToolbar } from "./board/BoardToolbar";
-import type { SceneLocation, VisibleNpc } from "../../types/api";
+import type { SceneLocation, SessionNpc } from "../../types/api";
 import type { DiscoveredClue } from "../../hooks/useGameSession";
 import type { BoardElement, BoardConnection } from "../../types/board";
 import "../../styles/board.css";
@@ -11,14 +11,14 @@ import "../../styles/board.css";
 interface DetectiveBoardViewProps {
   discoveredClues: DiscoveredClue[];
   currentLocation: SceneLocation;
-  visibleNpcs: VisibleNpc[];
+  npcs: SessionNpc[];
   onBack: () => void;
 }
 
 export function DetectiveBoardView({
   discoveredClues,
   currentLocation,
-  visibleNpcs,
+  npcs,
   onBack,
 }: DetectiveBoardViewProps) {
   const [connections, setConnections] = useState<BoardConnection[]>([]);
@@ -57,17 +57,17 @@ export function DetectiveBoardView({
       rotation: -1,
     });
 
-    // 添加可见人物
-    visibleNpcs.forEach((npc, index) => {
+    // 添加已遇见人物
+    npcs.forEach((npc, index) => {
       const rotation = ((index * 13) % 6) - 3;
       newElements.push({
-        id: `npc-${npc.key}`,
+        id: `npc-${npc.character_id}`,
         type: "npc",
         x: 150 + index * 200,
         y: 400,
         title: npc.display_name,
-        content: "",
-        sourceId: npc.key,
+        content: npc.public_identity || "",
+        sourceId: npc.character_id,
         createdAt: new Date(),
         rotation,
       });
@@ -110,7 +110,7 @@ export function DetectiveBoardView({
       <header className="p-6 border-b border-(--border-color) flex items-center justify-between">
         <div>
           <h2 className="text-sm text-(--text-muted) uppercase tracking-wider mb-1">
-            侦探板
+            线索板
           </h2>
           <h1 className="font-heading text-2xl text-(--text-primary)">
             思维空间
