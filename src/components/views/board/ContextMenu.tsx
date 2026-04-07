@@ -27,12 +27,10 @@ export function ContextMenu({
         style={{ left: x, top: y }}
       >
         <div className="context-menu-item" onClick={() => { onBringToFront(); }}>
-          <span>📌</span>
           <span>置于顶层</span>
         </div>
         <div className="context-menu-divider" />
         <div className="context-menu-item danger" onClick={() => { onDelete(); }}>
-          <span>🗑️</span>
           <span>删除</span>
         </div>
       </div>

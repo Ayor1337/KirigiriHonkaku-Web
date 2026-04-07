@@ -59,7 +59,7 @@ export function InvestigationView({
           onClick={onInvestigate}
           loading={loading}
         >
-          🔍 调查此地
+          调查此地
         </InkButton>
       </section>
 

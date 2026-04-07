@@ -107,7 +107,7 @@ export function ActionColumn({
           onClick={onInvestigate}
           loading={loading}
         >
-          🔍 调查当前地点
+          调查当前地点
         </InkButton>
       </section>
 

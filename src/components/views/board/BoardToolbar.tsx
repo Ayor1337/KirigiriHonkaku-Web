@@ -12,7 +12,7 @@ export function BoardToolbar({ onAddNote, onClearBoard }: BoardToolbarProps) {
         title="添加便利贴"
         onClick={onAddNote}
       >
-        📝
+        +
       </button>
       <button
         className="toolbar-btn"
@@ -23,7 +23,7 @@ export function BoardToolbar({ onAddNote, onClearBoard }: BoardToolbarProps) {
           }
         }}
       >
-        🗑️
+        清
       </button>
     </div>
   );

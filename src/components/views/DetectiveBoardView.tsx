@@ -143,7 +143,7 @@ export function DetectiveBoardView({
 
         {/* 使用提示 */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-(--text-muted) bg-(--bg-secondary)/80 backdrop-blur px-4 py-2 rounded-full border border-(--border-color)">
-          💡 拖拽移动 · 右键菜单 · 拖拽连接点建立关联
+          拖拽移动 · 右键菜单 · 拖拽连接点建立关联
         </div>
       </div>
     </div>

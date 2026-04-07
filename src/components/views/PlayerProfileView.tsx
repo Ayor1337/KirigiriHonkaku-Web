@@ -187,25 +187,21 @@ export function PlayerProfileView({
               {
                 label: "持有线索",
                 value: discoveredClueCount,
-                icon: "🔍",
                 color: "#be4bdb",
               },
               {
                 label: "暴露等级",
                 value: exposure.level,
-                icon: "📍",
                 color: exposureStyle.color,
               },
               {
                 label: "暴露度",
                 value: `${exposure.value}%`,
-                icon: "⚠️",
                 color: exposureStyle.color,
               },
               {
                 label: "游戏时间",
                 value: formatTime(currentTimeMinute),
-                icon: "⏰",
                 color: "#f59e0b",
               },
             ].map((stat) => (
@@ -213,7 +209,6 @@ export function PlayerProfileView({
                 key={stat.label}
                 className="p-4 rounded-lg border text-center bg-(--bg-tertiary)/60 border-(--border-color)"
               >
-                <div className="text-2xl mb-1">{stat.icon}</div>
                 <div
                   className="text-2xl font-bold mb-1"
                   style={{ color: stat.color }}

@@ -66,7 +66,7 @@ export function MapView({
         x: 0,
         y: 0,
         label: currentLocation.name,
-        icon: '📍',
+        icon: '',
       },
     ];
 

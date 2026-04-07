@@ -23,7 +23,7 @@
         - generic [ref=e42]:
           - heading "主展厅" [level=4] [ref=e43]
           - paragraph [ref=e44]: 展示着各种古董钟的大厅，中央有一座巨大的摆钟。
-      - button "🔍 调查当前地点" [ref=e46]: 🔍 调查当前地点
+      - button "调查当前地点" [ref=e46]: 调查当前地点
       - generic [ref=e47]:
         - heading "前往地点" [level=3] [ref=e48]: 前往地点
         - generic [ref=e50]:
@@ -56,16 +56,16 @@
         - heading "最近动态" [level=3] [ref=e135]: 最近动态
         - generic [ref=e137]: 你开始仔细检查主展厅的环境。聚光灯的光束在展品间缓缓移动，在抛光的大理石地板上投下交错的影子。你注意到西北角的展柜玻璃上有一道细微的划痕，不像是自然磨损。东侧墙壁的挂画《月下运河》略微歪斜，画框边缘积着薄灰，但左下角有一小块区域异常干净，似乎最近被触碰过。展厅中央的雕塑基座背面，有一处不易察觉的凹陷，材质与周围略有不同。空气中有淡淡的旧纸和木料气味，混合着一丝若有若无的金属锈味。
   - navigation [ref=e138]:
-    - button "🗺️ 地图 4" [active] [ref=e139]:
-      - generic [ref=e140]: 🗺️
+    - button "地图 4" [active] [ref=e139]:
+      - generic [ref=e140]: 
       - generic [ref=e141]: 地图
       - generic [ref=e142]: "4"
-    - button "📋 线索册" [ref=e143]:
-      - generic [ref=e144]: 📋
+    - button "线索册" [ref=e143]:
+      - generic [ref=e144]: 
       - generic [ref=e145]: 线索册
-    - button "🧩 侦探板" [ref=e146]:
-      - generic [ref=e147]: 🧩
+    - button "侦探板" [ref=e146]:
+      - generic [ref=e147]: 
       - generic [ref=e148]: 侦探板
-    - button "📝 对话记录" [ref=e149]:
-      - generic [ref=e150]: 📝
+    - button "对话记录" [ref=e149]:
+      - generic [ref=e150]: 
       - generic [ref=e151]: 对话记录

@@ -58,6 +58,8 @@ export function SessionDrawer({
     setResumeError(null);
     try {
       const detail = await getSession(sessionId);
+      console.log(detail);
+
       const playerId = detail.root_ids?.player_id;
       if (!playerId) {
         setResumeError("该会话尚未初始化，无法继续调查");
@@ -173,7 +175,6 @@ export function SessionDrawer({
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <div className="text-3xl mb-3">⚠️</div>
               <p className="text-(--text-primary) font-serif mb-2">加载失败</p>
               <p className="text-sm text-(--text-secondary) max-w-xs">
                 {error}

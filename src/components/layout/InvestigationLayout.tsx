@@ -64,7 +64,6 @@ export function InvestigationLayout() {
     return (
       <div className="h-screen flex items-center justify-center bg-(--bg-primary)">
         <div className="text-center space-y-4 max-w-md px-6">
-          <div className="text-4xl">⚠️</div>
           <p className="text-(--text-primary) font-serif text-lg">
             调查初始化失败
           </p>

@@ -183,7 +183,7 @@
 }
 
 .card-location::before {
-  content: '📍';
+  content: '';
   position: absolute;
   top: -12px;
   right: 10px;

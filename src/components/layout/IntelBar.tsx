@@ -27,28 +27,24 @@ export function IntelBar({
     {
       id: "map",
       label: "地图",
-      icon: "🗺️",
       badge: mapPoints > 0 ? mapPoints : undefined,
       view: "map" as ViewState,
     },
     {
       id: "clues",
       label: "线索册",
-      icon: "📋",
       badge: unreadClues > 0 ? unreadClues : undefined,
       view: "investigation" as ViewState,
     },
     {
       id: "board",
       label: "侦探板",
-      icon: "🧩",
       badge: connectableClues > 0 ? connectableClues : undefined,
       view: "board" as ViewState,
     },
     {
       id: "records",
       label: "对话记录",
-      icon: "📝",
       view: "dialogue" as ViewState,
     },
   ];
@@ -68,7 +64,6 @@ export function IntelBar({
             }
           `}
         >
-          <span>{item.icon}</span>
           <span>{item.label}</span>
           {item.badge !== undefined && (
             <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs bg-(--accent-primary) text-white rounded-full">
