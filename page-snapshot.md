@@ -1,0 +1,71 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: 1924.10.15
+      - generic [ref=e7]:
+        - generic [ref=e8]: 01:30
+        - generic [ref=e9]: "|"
+        - generic [ref=e10]: 夜晚
+        - generic [ref=e11]: "|"
+        - generic [ref=e12]: 雨
+    - generic [ref=e14]: 你开始仔细检查主展厅的环境。聚光灯的光束在展品间缓缓移动，在抛光的大理石地板上投下交错的影子。你注意到西北角的展柜玻璃上有一道细微的划痕，不像是自然磨损。东侧墙壁的挂画《月下运河》略微歪斜，画框边缘积着薄灰，但左下角有一小块区域异常干净，似乎最近被触碰过。展厅中央的雕塑基座背面，有一处不易察觉的凹陷，材质与周围略有不同。空气中有淡淡的旧纸和木料气味，混合着一丝若有若无的金属锈味。
+    - button "切换到亮色主题" [ref=e16]:
+      - img [ref=e17]
+  - generic [ref=e19]:
+    - complementary [ref=e20]:
+      - generic [ref=e21]:
+        - heading "侦探档案" [level=3] [ref=e22]: 侦探档案
+        - generic [ref=e24] [cursor=pointer]:
+          - generic [ref=e25]
+          - generic [ref=e32]
+      - generic [ref=e39]:
+        - heading "当前地点" [level=3] [ref=e40]: 当前地点
+        - generic [ref=e42]:
+          - heading "主展厅" [level=4] [ref=e43]
+          - paragraph [ref=e44]: 展示着各种古董钟的大厅，中央有一座巨大的摆钟。
+      - button "🔍 调查当前地点" [ref=e46]: 🔍 调查当前地点
+      - generic [ref=e47]:
+        - heading "前往地点" [level=3] [ref=e48]: 前往地点
+        - generic [ref=e50]:
+          - button "入口大厅" [ref=e51]
+          - button "休息室" [ref=e53]
+          - button "办公室" [ref=e55]
+          - button "密室" [ref=e57]
+      - generic [ref=e59]:
+        - heading "询问对象" [level=3] [ref=e60]: 询问对象
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e65]
+          - generic [ref=e67]: 亚历克斯
+    - main [ref=e68]:
+      - generic [ref=e69]:
+        - generic:
+          - heading "地图" [level=2]
+          - heading "雾切洋馆" [level=1]
+        - img "洋馆地图" [ref=e70]:
+          - generic [ref=e80]
+    - complementary [ref=e120]:
+      - generic [ref=e121]:
+        - heading "在场人物" [level=3] [ref=e122]: 在场人物
+        - button "亚历克斯" [ref=e125]:
+          - img [ref=e126]
+          - generic [ref=e128]: 亚历克斯
+      - generic [ref=e129]:
+        - heading "已发现线索" [level=3] [ref=e130]: 已发现线索
+        - paragraph [ref=e133]: 尚未发现任何线索...
+      - generic [ref=e134]:
+        - heading "最近动态" [level=3] [ref=e135]: 最近动态
+        - generic [ref=e137]: 你开始仔细检查主展厅的环境。聚光灯的光束在展品间缓缓移动，在抛光的大理石地板上投下交错的影子。你注意到西北角的展柜玻璃上有一道细微的划痕，不像是自然磨损。东侧墙壁的挂画《月下运河》略微歪斜，画框边缘积着薄灰，但左下角有一小块区域异常干净，似乎最近被触碰过。展厅中央的雕塑基座背面，有一处不易察觉的凹陷，材质与周围略有不同。空气中有淡淡的旧纸和木料气味，混合着一丝若有若无的金属锈味。
+  - navigation [ref=e138]:
+    - button "🗺️ 地图 4" [active] [ref=e139]:
+      - generic [ref=e140]: 🗺️
+      - generic [ref=e141]: 地图
+      - generic [ref=e142]: "4"
+    - button "📋 线索册" [ref=e143]:
+      - generic [ref=e144]: 📋
+      - generic [ref=e145]: 线索册
+    - button "🧩 侦探板" [ref=e146]:
+      - generic [ref=e147]: 🧩
+      - generic [ref=e148]: 侦探板
+    - button "📝 对话记录" [ref=e149]:
+      - generic [ref=e150]: 📝
+      - generic [ref=e151]: 对话记录

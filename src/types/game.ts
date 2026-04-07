@@ -82,10 +82,7 @@ export interface Session {
   exposure_value: number;
   exposure_level: ExposureLevel;
 
-  // 模板来源
-  case_template_key: string | null;
-  map_template_key: string | null;
-  truth_template_key: string | null;
+  // Step 6 移除模板来源字段（改为 AGENT 生成）
 
   // 文本附件引用（文件路径）
   story_file_path: string | null;

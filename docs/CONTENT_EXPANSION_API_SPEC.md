@@ -1,24 +1,26 @@
 # Step 6 内容扩展 API 规范
 
-> 本文档描述 Step 6 第一版对外 HTTP 接口约定。
-> 当前版本不新增新端点，重点是说明模板组合、bootstrap 校验和最小复杂规则对现有接口语义的影响。
+> 本文档描述当前对外 HTTP 接口约定。
+> 当前版本已将会话 bootstrap 从模板装配改为多轮 AGENT 生成。
 > 固定指令：Implementation Plan, Task List and Thought in Chinese
 
 ## 1. 范围
 
-当前对外仍只使用以下接口：
+当前对外使用以下接口：
 
 - `POST /api/v1/sessions`
+- `GET /api/v1/sessions`
 - `POST /api/v1/sessions/{session_id}/bootstrap`
 - `GET /api/v1/sessions/{session_id}`
 - `POST /api/v1/actions`
 
-Step 6 第一版不新增：
+当前版本不新增：
 
 - 模板列表查询接口
 - 侦探板接口
 - 知识池接口
 - 隐藏区域专用动作接口
+- 独立后台任务接口
 
 ## 2. 会话创建
 
@@ -26,37 +28,101 @@ Step 6 第一版不新增：
 
 请求体：
 
+- 空请求体
+- 不再接收 `title`
+- 不再接收 `case_template_key / map_template_key / truth_template_key`
+
+示例：
+
+```http
+POST /api/v1/sessions
+```
+
+成功响应语义：
+
+- 创建最小会话根记录
+- 生成 `uuid`
+- 初始化运行时目录
+- 返回当前状态 `draft`
+- `title` 初始允许为 `null`
+- `root_ids` 初始为空对象 `{}`
+
+成功响应示例：
+
 ```json
 {
-  "title": "Theater Demo",
-  "case_template_key": "case-theater",
-  "map_template_key": "map-theater",
-  "truth_template_key": "truth-theater"
+  "id": "...",
+  "uuid": "...",
+  "title": null,
+  "status": "draft",
+  "start_time_minute": 0,
+  "current_time_minute": 0,
+  "data_directories": {
+    "session_root": "...",
+    "story": "...",
+    "history": "...",
+    "truth": "...",
+    "npc": "...",
+    "dialogue": "...",
+    "clue": "..."
+  },
+  "root_ids": {}
 }
 ```
 
+## 3. 会话列表查询
+
+### 3.1 `GET /api/v1/sessions`
+
 说明：
 
-- 这三个 key 在 Step 6 中不再只是占位。
-- 它们共同决定后续 bootstrap 时要装配哪一组内容模板。
-- 创建会话阶段不校验组合是否合法。
-- 真正的模板组合校验发生在 bootstrap 阶段。
+- 返回全部会话的基础状态列表
+- 响应体为数组，不额外包裹 `items/total`
+- 默认按 `created_at` 倒序（最新创建的会话在前）
+- 列表项不包含 `data_directories`
+- 列表项不包含 `root_ids`
 
-成功响应仍返回：
+示例：
 
-- 会话基础字段
-- 当前状态 `draft`
-- 运行时数据目录
+```http
+GET /api/v1/sessions
+```
 
-## 3. 世界初始化
+成功响应示例：
 
-### 3.1 `POST /api/v1/sessions/{session_id}/bootstrap`
+```json
+[
+  {
+    "id": "...",
+    "uuid": "...",
+    "title": null,
+    "status": "draft",
+    "start_time_minute": 0,
+    "current_time_minute": 0
+  },
+  {
+    "id": "...",
+    "uuid": "...",
+    "title": "Generated Case 4f26c2ad",
+    "status": "ready",
+    "start_time_minute": 0,
+    "current_time_minute": 15
+  }
+]
+```
+
+## 4. 世界初始化
+
+### 4.1 `POST /api/v1/sessions/{session_id}/bootstrap`
 
 作用：
 
-- 按会话上的 `case/map/truth` key 解析模板组合
-- 校验组合是否合法
-- 装配地图、NPC、线索、事件和 truth payload
+- 将指定 `draft` 会话切换到 `generating`
+- 通过多轮 AGENT 生成完整可玩的游戏世界
+- 生成正式 `title`
+- 生成地图、NPC、线索、事件与 truth payload
+- 校验结构合法性后一次性落库
+- 成功后将会话状态切为 `ready`
 
 成功响应示例：
 
@@ -65,12 +131,12 @@ Step 6 第一版不新增：
   "session_id": "...",
   "status": "ready",
   "created_counts": {
-    "characters": 4,
+    "characters": 3,
     "players": 1,
-    "npcs": 3,
-    "locations": 5,
-    "connections": 5,
-    "clues": 3,
+    "npcs": 2,
+    "locations": 3,
+    "connections": 2,
+    "clues": 2,
     "events": 1,
     "dialogues": 0
   },
@@ -84,30 +150,96 @@ Step 6 第一版不新增：
 失败语义：
 
 - `404`：会话不存在
-- `409`：会话已经 bootstrap 过
-- `422`：模板组合未注册
+- `409`：会话已 `ready`
+- `409`：会话当前处于 `generating`
+- `422`：AGENT 返回结构可解析，但未通过本地业务校验
+- `502`：AGENT 返回内容无法解析为结构化结果
+- `503`：模型 provider 不可用、超时或调用失败
 
 `422` 示例：
 
 ```json
 {
-  "detail": "Template combination is not registered."
+  "detail": {
+    "message": "Generated world blueprint failed validation.",
+    "errors": [
+      "truth.required_clue_keys must contain at least one clue key."
+    ]
+  }
 }
 ```
 
-## 4. 会话读取
+## 5. 会话读取
 
-### 4.1 `GET /api/v1/sessions/{session_id}`
+### 5.1 `GET /api/v1/sessions/{session_id}`
 
 说明：
 
-- 只返回会话基础状态与目录信息
-- 不展开模板详情
-- 可用于确认 bootstrap 失败后状态是否仍为 `draft`
+- 返回会话基础状态、目录信息与根 ID 信息
+- `title` 在 `draft / generating` 阶段允许为 `null`
+- `root_ids` 在会话未完成 bootstrap 时允许为空对象 `{}`
+- bootstrap 成功后会返回 AGENT 生成的正式标题与根 ID
+- 可用于确认 bootstrap 失败后状态是否已回退为 `draft`
 
-## 5. 动作提交
+成功响应示例（`draft`）：
 
-### 5.1 `POST /api/v1/actions`
+```json
+{
+  "id": "...",
+  "uuid": "...",
+  "title": null,
+  "status": "draft",
+  "start_time_minute": 0,
+  "current_time_minute": 0,
+  "data_directories": {
+    "session_root": "...",
+    "story": "...",
+    "history": "...",
+    "truth": "...",
+    "npc": "...",
+    "dialogue": "...",
+    "clue": "..."
+  },
+  "root_ids": {}
+}
+```
+
+成功响应示例（`ready`）：
+
+```json
+{
+  "id": "...",
+  "uuid": "...",
+  "title": "Generated Case 4f26c2ad",
+  "status": "ready",
+  "start_time_minute": 0,
+  "current_time_minute": 15,
+  "data_directories": {
+    "session_root": "...",
+    "story": "...",
+    "history": "...",
+    "truth": "...",
+    "npc": "...",
+    "dialogue": "...",
+    "clue": "..."
+  },
+  "root_ids": {
+    "player_id": "...",
+    "map_id": "..."
+  }
+}
+```
+
+当前会话状态包括：
+
+- `draft`
+- `generating`
+- `ready`
+- `ended`
+
+## 6. 动作提交
+
+### 6.1 `POST /api/v1/actions`
 
 当前仍支持：
 
@@ -117,78 +249,31 @@ Step 6 第一版不新增：
 - `gather`
 - `accuse`
 
-Step 6 第一版只增强现有动作语义，不新增动作类型。
+### 6.2 状态前置约束
 
-### 5.2 `move`
+动作提交前会校验会话状态：
 
-`payload` 示例：
+- `draft`：返回 `409`，detail 为 `Session world state has not been bootstrapped.`
+- `generating`：返回 `409`，detail 为 `Session world state is currently being generated.`
+- `ended`：返回 `409`，detail 为 `Session has already ended.`
 
-```json
-{
-  "target_location_key": "trap-storage"
-}
-```
+### 6.3 其他动作语义
 
-新增语义：
+当前 `move / talk / investigate / gather / accuse` 的引擎语义保持不变。
 
-- 引擎会结合连接上的 `access_rule.required_token` 判断目标是否可达。
-- 如果玩家还没有所需 token，动作会被拒绝。
+现阶段变化重点在于：
 
-### 5.3 `investigate`
-
-`payload` 可以为空对象：
-
-```json
-{}
-```
-
-新增语义：
-
-- 当前地点可能通过调查发放访问 token。
-- 当前地点上的线索只有在满足 `discovery_rule` 时才会被收集。
-- 未满足条件的线索不会进入知识池，也不会出现在 `investigable_clues` 中。
-
-调查结果示例关注字段：
-
-- `state_delta_summary.investigation.discovered_clues`
-- `state_delta_summary.investigation.granted_access_tokens`
-- `scene_snapshot.details.reachable_locations`
-
-### 5.4 `gather`
-
-说明：
-
-- 仍用于主动形成公开场合。
-- Step 6 第一版没有新增 gather 参数，只继续复用当前结构。
-
-### 5.5 `accuse`
-
-说明：
-
-- Step 6 第一版不新增新的结案模式。
-- 通过不同模板下的 truth 配置和场景结构，拉开案件差异。
-
-## 6. Scene Snapshot 关键补充
-
-### 6.1 `reachable_locations`
-
-含义：
-
-- 只返回当前时间、当前地点、当前访问 token 条件下真正可走的地点。
-- 默认不会包含未解锁的受限连接目标。
-
-### 6.2 `investigable_clues`
-
-含义：
-
-- 只返回当前地点、当前条件下可见且可收集的线索。
-- 条件线索在条件未满足时不会出现在这里。
+- 世界来源已从模板装配切换为 AGENT 生成
+- truth、地点、角色和线索的具体内容不再由固定模板 key 决定
+- 动作层仍消费同一套运行态数据库结构
 
 ## 7. 当前结论
 
-Step 6 第一版对外 API 的变化重点不是“端点变多”，而是：
+当前版本对外 API 的关键变化是：
 
-- 模板组合开始具有真实语义
-- bootstrap 会拒绝非法组合
-- move 开始受访问 token 约束
-- investigate 开始驱动隐藏路径开放与条件线索显现
+- `POST /sessions` 改为空请求体
+- 新增 `GET /sessions` 查询全部会话
+- `GET /sessions/{id}` 补充返回 `root_ids`，用于前端继续游戏
+- `bootstrap` 改为多轮 AGENT 生成完整游戏
+- 会话新增 `generating` 状态
+- `title` 改为在 bootstrap 成功后生成并回写

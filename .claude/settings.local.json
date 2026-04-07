@@ -1,5 +1,11 @@
 {
   "permissions": {
-    "allow": []
+    "allow": [
+      "mcp__plugin_serena_serena__list_dir",
+      "mcp__plugin_serena_serena__read_file",
+      "mcp__plugin_serena_serena__replace_content",
+      "Bash(python:*)",
+      "Bash(npx tsx:*)"
+    ]
   }
 }

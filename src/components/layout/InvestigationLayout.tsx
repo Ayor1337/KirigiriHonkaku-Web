@@ -29,12 +29,9 @@ export function InvestigationLayout() {
   useEffect(() => {
     const sessionId = searchParams.get("sessionId");
     const playerId = searchParams.get("playerId");
-    const template = searchParams.get("template");
 
     if (sessionId && playerId) {
       game.resumeGame(sessionId, playerId);
-    } else if (template) {
-      game.startGame(template);
     }
     // 仅在首次挂载时初始化
     // eslint-disable-next-line react-hooks/exhaustive-deps

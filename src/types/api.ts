@@ -5,11 +5,10 @@
 // 请求类型
 // ============================================
 
+// Step 6: POST /sessions 改为空请求体，不再接收 title 和模板 key
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CreateSessionRequest {
-  title: string;
-  case_template_key: string;
-  map_template_key: string;
-  truth_template_key: string;
+  // 空请求体
 }
 
 export type ActionType = "move" | "talk" | "investigate" | "gather" | "accuse";
@@ -29,14 +28,15 @@ export interface ActionRequest {
 export interface SessionResponse {
   id: string;
   uuid: string;
-  title: string;
+  title: string | null;
   status: string;
   start_time_minute: number;
   current_time_minute: number;
-  case_template_key: string | null;
-  map_template_key: string | null;
-  truth_template_key: string | null;
-  data_directories: Record<string, string>;
+  data_directories?: Record<string, string>;
+  root_ids?: {
+    player_id?: string;
+    map_id?: string;
+  };
 }
 
 export interface SessionBootstrapResponse {

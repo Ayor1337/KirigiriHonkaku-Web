@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useGameSession } from "../../hooks/useGameSession";
+import { getSessions } from "../../api/client";
+import type { SessionResponse } from "../../types/api";
+import { SessionDrawer } from "../ui/SessionDrawer";
 
 export function HomeView() {
   const navigate = useNavigate();
@@ -9,7 +12,11 @@ export function HomeView() {
   const [titleRevealed, setTitleRevealed] = useState(0);
   const [subtitleRevealed, setSubtitleRevealed] = useState(false);
   const [buttonVisible, setButtonVisible] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sessions, setSessions] = useState<SessionResponse[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
 
   const title = "霧切本格";
   const subtitle = "KIRIGIRI HONKAKU";
@@ -49,15 +56,36 @@ export function HomeView() {
     };
   }, []);
 
-  const handleStartGame = async (templateKey: string) => {
+  const handleStartGame = async () => {
     try {
-      const { sessionId, playerId } = await game.startGame(templateKey);
-      navigate(
-        `/game?sessionId=${sessionId}&playerId=${playerId}&template=${templateKey}`,
-      );
+      const { sessionId, playerId } = await game.startGame();
+      navigate(`/game?sessionId=${sessionId}&playerId=${playerId}`);
     } catch {
       // error is already stored in game.error
     }
+  };
+
+  const handleOpenHistory = async () => {
+    setDrawerOpen(true);
+    setSessionsLoading(true);
+    setSessionsError(null);
+    try {
+      const list = await getSessions();
+      // 优先展示有较新游戏时间的会话
+      const sorted = [...list].sort(
+        (a, b) => b.current_time_minute - a.current_time_minute,
+      );
+      setSessions(sorted);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "请求失败";
+      setSessionsError(message);
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  const handleResumeSession = (sessionId: string, playerId: string) => {
+    navigate(`/game?sessionId=${sessionId}&playerId=${playerId}`);
   };
 
   return (
@@ -149,12 +177,20 @@ export function HomeView() {
         `}
       />
 
-      {/* 进入按钮 / 模板选择 */}
-      {!showTemplates ? (
+      {/* 按钮组 */}
+      <div
+        className={`
+          absolute bottom-[20%] left-1/2 -translate-x-1/2
+          flex flex-col sm:flex-row items-center gap-4
+          transition-all duration-500
+          ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}
+        `}
+      >
+        {/* 历史调查 */}
         <button
-          onClick={() => setShowTemplates(true)}
-          className={`
-            absolute bottom-[20%] left-1/2 -translate-x-1/2
+          onClick={handleOpenHistory}
+          disabled={game.loading}
+          className="
             group flex items-center gap-3
             px-8 py-4
             font-serif text-sm tracking-[0.3em] uppercase
@@ -164,73 +200,61 @@ export function HomeView() {
             transition-all duration-500
             hover:border-(--accent-primary) hover:text-(--text-primary)
             hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
-            ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}
-          `}
+            disabled:opacity-50 disabled:cursor-not-allowed
+          "
+        >
+          <svg
+            className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+          >
+            <path d="M4 6h16M4 12h16M4 18h7" />
+          </svg>
+          <span>历史调查</span>
+        </button>
+
+        {/* 进入调查 */}
+        <button
+          onClick={handleStartGame}
+          disabled={game.loading}
+          className="
+            group flex items-center gap-3
+            px-8 py-4
+            font-serif text-sm tracking-[0.3em] uppercase
+            text-(--text-secondary)
+            border border-(--border-color)
+            bg-transparent
+            transition-all duration-500
+            hover:border-(--accent-primary) hover:text-(--text-primary)
+            hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
+            disabled:opacity-50 disabled:cursor-not-allowed
+          "
         >
           <span>进入调查</span>
           <svg
             className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth={2}
             viewBox="0 0 24 24"
           >
             <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
-      ) : (
-        <div
-          className={`
-            absolute bottom-[12%] left-1/2 -translate-x-1/2
-            flex flex-col items-center gap-4
-            transition-all duration-500
-            ${buttonVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}
-          `}
-        >
-          <p className="font-serif text-sm tracking-[0.2em] text-(--text-muted) mb-2">
-            选择案件模板
-          </p>
+      </div>
 
-          {game.error && (
-            <p className="text-sm text-red-400 mb-2">{game.error}</p>
-          )}
+      {game.error && (
+        <p className="absolute bottom-[12%] left-1/2 -translate-x-1/2 text-sm text-red-400">
+          {game.error}
+        </p>
+      )}
 
-          <div className="flex gap-4">
-            <button
-              onClick={() => handleStartGame("manor")}
-              disabled={game.loading}
-              className="group px-8 py-4 border border-(--border-color) bg-transparent
-                font-serif text-sm tracking-[0.2em] text-(--text-secondary)
-                transition-all duration-500
-                hover:border-(--accent-primary) hover:text-(--text-primary)
-                hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
-                disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="text-lg mb-1">🏚️</div>
-              <span>雾切洋馆</span>
-            </button>
-
-            <button
-              onClick={() => handleStartGame("theater")}
-              disabled={game.loading}
-              className="group px-8 py-4 border border-(--border-color) bg-transparent
-                font-serif text-sm tracking-[0.2em] text-(--text-secondary)
-                transition-all duration-500
-                hover:border-(--accent-primary) hover:text-(--text-primary)
-                hover:shadow-[0_0_30px_rgba(190,75,219,0.2)]
-                disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <div className="text-lg mb-1">🎭</div>
-              <span>剧场奇案</span>
-            </button>
-          </div>
-
-          {game.loading && (
-            <div className="flex items-center gap-2 text-(--text-muted) text-sm">
-              <div className="w-4 h-4 border-2 border-(--accent-primary) border-t-transparent rounded-full animate-spin" />
-              <span>正在创建游戏会话...</span>
-            </div>
-          )}
+      {game.loading && (
+        <div className="absolute bottom-[12%] left-1/2 -translate-x-1/2 flex items-center gap-2 text-(--text-muted) text-sm">
+          <div className="w-4 h-4 border-2 border-(--accent-primary) border-t-transparent rounded-full animate-spin" />
+          <span>正在创建游戏会话...</span>
         </div>
       )}
 
@@ -239,6 +263,16 @@ export function HomeView() {
       <div className="absolute top-8 right-8 w-12 h-12 border-r border-t border-(--border-color) opacity-50" />
       <div className="absolute bottom-8 left-8 w-12 h-12 border-l border-b border-(--border-color) opacity-50" />
       <div className="absolute bottom-8 right-8 w-12 h-12 border-r border-b border-(--border-color) opacity-50" />
+
+      {/* 历史调查抽屉 */}
+      <SessionDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        sessions={sessions}
+        loading={sessionsLoading}
+        error={sessionsError}
+        onResume={handleResumeSession}
+      />
     </div>
   );
 }

@@ -36,21 +36,7 @@ interface GameSessionState {
   error: string | null;
 }
 
-const TEMPLATE_MAP: Record<
-  string,
-  { case_key: string; map_key: string; truth_key: string }
-> = {
-  manor: {
-    case_key: "case-manor",
-    map_key: "map-manor",
-    truth_key: "truth-manor",
-  },
-  theater: {
-    case_key: "case-theater",
-    map_key: "map-theater",
-    truth_key: "truth-theater",
-  },
-};
+// Step 6: 模板选择已移除，会话创建改为空请求体，世界由 AGENT 生成
 
 export function useGameSession() {
   const [state, setState] = useState<GameSessionState>({
@@ -145,24 +131,13 @@ export function useGameSession() {
     [],
   );
 
-  /** 创建并初始化游戏 */
-  const startGame = useCallback(async (templateKey: string) => {
-    const template = TEMPLATE_MAP[templateKey];
-    if (!template) {
-      setState((prev) => ({ ...prev, error: `未知模板: ${templateKey}` }));
-      return null;
-    }
-
+  /** 创建并初始化游戏（Step 6: 空请求体，AGENT 生成世界） */
+  const startGame = useCallback(async () => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
       // 1. 创建会话
-      const session = await createSession({
-        title: `${templateKey} game`,
-        case_template_key: template.case_key,
-        map_template_key: template.map_key,
-        truth_template_key: template.truth_key,
-      });
+      const session = await createSession();
 
       const sessionId = String(session.id);
 
@@ -229,35 +204,20 @@ export function useGameSession() {
         ...prev,
         sessionId,
         playerId,
+        discoveredClues: [],
+        visitedLocations: [],
         loading: true,
         error: null,
       }));
 
       try {
-        const result = await submitAction({
-          session_id: sessionId,
-          action_type: "investigate",
-          actor_id: playerId,
-          payload: {},
-        });
-
-        const currentLoc = result.scene_snapshot.details.current_location;
-
-        setState((prev) => ({
-          ...prev,
-          scene: result.scene_snapshot,
-          lastDelta: result.state_delta_summary,
-          narrativeText: result.narrative_text,
-          visitedLocations: [{ key: currentLoc.key, name: currentLoc.name }],
-          loading: false,
-          error: null,
-        }));
+        await doAction("investigate", {});
       } catch (err) {
         const message = err instanceof Error ? err.message : "恢复游戏失败";
         setState((prev) => ({ ...prev, loading: false, error: message }));
       }
     },
-    [],
+    [doAction],
   );
 
   // 暴露的 action 方法

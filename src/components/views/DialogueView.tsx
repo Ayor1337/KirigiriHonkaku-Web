@@ -52,9 +52,9 @@ export function DialogueView({
             <h2 className="font-heading text-2xl text-(--text-primary)">
               {npcName}
             </h2>
-            {latestDialogue?.npc_key && (
+            {latestDialogue?.target_npc_key && (
               <span className="text-sm text-(--text-muted)">
-                {latestDialogue.npc_key}
+                {latestDialogue.target_npc_key}
               </span>
             )}
           </div>

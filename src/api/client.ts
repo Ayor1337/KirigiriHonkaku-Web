@@ -2,7 +2,6 @@
 // 后端 API 客户端 — 原生 fetch 封装
 
 import type {
-  CreateSessionRequest,
   SessionResponse,
   SessionBootstrapResponse,
   ActionRequest,
@@ -13,12 +12,14 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 const API_PREFIX = `${BASE_URL}/api/v1`;
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    public detail: string,
-  ) {
+  status: number;
+  detail: string;
+
+  constructor(status: number, detail: string) {
     super(detail);
     this.name = "ApiError";
+    this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -45,13 +46,11 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-/** 创建会话 */
-export function createSession(
-  req: CreateSessionRequest,
-): Promise<SessionResponse> {
+/** 创建会话（Step 6 改为空请求体） */
+export function createSession(): Promise<SessionResponse> {
   return request<SessionResponse>(`${API_PREFIX}/sessions`, {
     method: "POST",
-    body: JSON.stringify(req),
+    body: JSON.stringify({}),
   });
 }
 
@@ -60,6 +59,11 @@ export function getSession(sessionId: string): Promise<SessionResponse> {
   return request<SessionResponse>(
     `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}`,
   );
+}
+
+/** 查询全部会话列表 */
+export function getSessions(): Promise<SessionResponse[]> {
+  return request<SessionResponse[]>(`${API_PREFIX}/sessions`);
 }
 
 /** 世界初始化 */
