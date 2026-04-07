@@ -2,8 +2,46 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useGameSession } from "../../hooks/useGameSession";
 import { getSessions } from "../../api/client";
-import type { SessionResponse } from "../../types/api";
+import type {
+  SessionBootstrapStageEvent,
+  SessionBootstrapStageKey,
+  SessionResponse,
+} from "../../types/api";
 import { SessionDrawer } from "../ui/SessionDrawer";
+
+const STAGE_LABELS: Record<SessionBootstrapStageKey, string> = {
+  session_creating: "正在建立调查卷宗...",
+  session_created: "卷宗已建立，准备生成案件...",
+  world_planning: "正在规划案件结构...",
+  world_generating: "正在生成世界内容...",
+  world_validating: "正在校验案件结构...",
+  world_fixing: "正在修正生成结果...",
+  world_persisting: "正在写入调查现场...",
+  world_ready: "案件已就绪，正在进入现场...",
+};
+
+function getStageLabel(
+  stageKey: SessionBootstrapStageKey | null,
+  stageMeta: SessionBootstrapStageEvent | null,
+): string {
+  if (!stageKey) {
+    return "正在准备调查...";
+  }
+
+  if (
+    stageKey === "world_validating" &&
+    stageMeta?.attempt != null &&
+    stageMeta?.max_attempts != null
+  ) {
+    return `正在校验案件结构（${stageMeta.attempt}/${stageMeta.max_attempts}）...`;
+  }
+
+  if (stageKey === "world_fixing" && stageMeta?.attempt) {
+    return `正在修正生成结果（第 ${stageMeta.attempt} 次）...`;
+  }
+
+  return STAGE_LABELS[stageKey];
+}
 
 export function HomeView() {
   const navigate = useNavigate();
@@ -254,7 +292,9 @@ export function HomeView() {
       {game.loading && (
         <div className="absolute bottom-[12%] left-1/2 -translate-x-1/2 flex items-center gap-2 text-(--text-muted) text-sm">
           <div className="w-4 h-4 border-2 border-(--accent-primary) border-t-transparent rounded-full animate-spin" />
-          <span>正在创建游戏会话...</span>
+          <span>
+            {getStageLabel(game.creationStageKey, game.creationStageMeta)}
+          </span>
         </div>
       )}
 

@@ -2,6 +2,7 @@
 // Constellation map — organic scatter layout with flowing Bézier connections
 
 import { useMemo, useCallback, useState } from 'react';
+import { LoadingOverlay } from '../ui/LoadingOverlay';
 import type { SceneLocation, ReachableLocation } from '../../types/api';
 
 interface ViewNode {
@@ -144,6 +145,7 @@ export function MapView({
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-(--bg-primary)">
+      {loading && <LoadingOverlay />}
       {/* Ambient radial vignette */}
       <div
         className="absolute inset-0 pointer-events-none"

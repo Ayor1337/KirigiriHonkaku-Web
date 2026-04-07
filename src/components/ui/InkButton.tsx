@@ -1,8 +1,10 @@
 import { useRef, type ButtonHTMLAttributes } from 'react';
+import { LoadingSpinner } from './LoadingSpinner';
 
 interface InkButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'default' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
 }
 
 export function InkButton({
@@ -10,6 +12,8 @@ export function InkButton({
   variant = 'default',
   size = 'md',
   className = '',
+  loading = false,
+  disabled,
   ...props
 }: InkButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -39,6 +43,7 @@ export function InkButton({
       ref={buttonRef}
       className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className} group`}
       onMouseEnter={handleMouseEnter}
+      disabled={disabled || loading}
       {...props}
     >
       {/* 墨水扩散背景 */}
@@ -50,7 +55,12 @@ export function InkButton({
           transition: 'transform 0.5s ease-out, opacity 0.3s ease',
         }}
       />
-      <span className="relative z-10">{children}</span>
+      <span className={`relative z-10 ${loading ? 'opacity-0' : ''}`}>{children}</span>
+      {loading && (
+        <span className="absolute inset-0 z-20 flex items-center justify-center">
+          <LoadingSpinner size="sm" />
+        </span>
+      )}
     </button>
   );
 }

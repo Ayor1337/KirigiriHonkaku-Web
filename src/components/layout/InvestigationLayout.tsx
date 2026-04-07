@@ -53,9 +53,7 @@ export function InvestigationLayout() {
       <div className="h-screen flex items-center justify-center bg-(--bg-primary)">
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-2 border-(--accent-primary) border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-(--text-secondary) font-serif">
-            正在初始化调查...
-          </p>
+          <p className="text-(--text-secondary) font-serif">正在加载调查...</p>
         </div>
       </div>
     );
@@ -184,6 +182,7 @@ export function InvestigationLayout() {
           newClueKeys={newClueKeys}
           onTalkNpc={handleTalkNpc}
           narrativeText={game.narrativeText}
+          loading={game.loading}
         />
       </div>
 

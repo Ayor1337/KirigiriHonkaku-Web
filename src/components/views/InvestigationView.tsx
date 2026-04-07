@@ -57,7 +57,7 @@ export function InvestigationView({
           size="lg"
           className="w-full"
           onClick={onInvestigate}
-          disabled={loading}
+          loading={loading}
         >
           🔍 调查此地
         </InkButton>
@@ -73,8 +73,10 @@ export function InvestigationView({
             {visibleNpcs.map((npc) => (
               <div
                 key={npc.key}
-                onClick={() => onTalkNpc(npc.key)}
-                className="flex items-center gap-3 p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg cursor-pointer hover:border-(--accent-primary) transition-colors"
+                onClick={() => !loading && onTalkNpc(npc.key)}
+                className={`flex items-center gap-3 p-4 bg-(--bg-secondary) border rounded-lg transition-colors ${
+                  loading ? "border-(--border-color) opacity-50 cursor-not-allowed pointer-events-none" : "border-(--border-color) cursor-pointer hover:border-(--accent-primary)"
+                }`}
               >
                 <div className="w-12 h-12 rounded-full bg-(--bg-primary) border border-(--border-color) flex items-center justify-center">
                   <svg
@@ -106,8 +108,10 @@ export function InvestigationView({
             {investigableClues.map((clue) => (
               <div
                 key={clue.key}
-                onClick={onInvestigate}
-                className="p-4 bg-(--bg-secondary) border border-(--border-color) rounded-lg cursor-pointer hover:border-(--accent-primary) transition-colors"
+                onClick={() => !loading && onInvestigate()}
+                className={`p-4 bg-(--bg-secondary) border rounded-lg transition-colors ${
+                  loading ? "border-(--border-color) opacity-50 cursor-not-allowed pointer-events-none" : "border-(--border-color) cursor-pointer hover:border-(--accent-primary)"
+                }`}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <svg

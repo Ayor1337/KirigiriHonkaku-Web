@@ -49,6 +49,30 @@ export interface SessionBootstrapResponse {
   };
 }
 
+export type SessionBootstrapStageKey =
+  | "session_creating"
+  | "session_created"
+  | "world_planning"
+  | "world_generating"
+  | "world_validating"
+  | "world_fixing"
+  | "world_persisting"
+  | "world_ready";
+
+export interface SessionBootstrapStageEvent {
+  placeholder: SessionBootstrapStageKey;
+  session_id?: string;
+  attempt?: number;
+  max_attempts?: number;
+}
+
+export interface SessionBootstrapErrorEvent {
+  code: string;
+  message: string;
+  session_id?: string;
+  failed_placeholder?: SessionBootstrapStageKey;
+}
+
 // ============================================
 // 响应类型 — 场景快照
 // ============================================

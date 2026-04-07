@@ -8,6 +8,7 @@ interface CaseColumnProps {
   newClueKeys?: string[];
   onTalkNpc: (npcKey: string) => void;
   narrativeText?: string | null;
+  loading?: boolean;
 }
 
 export function CaseColumn({
@@ -16,6 +17,7 @@ export function CaseColumn({
   newClueKeys = [],
   onTalkNpc,
   narrativeText,
+  loading,
 }: CaseColumnProps) {
   return (
     <aside className="h-full bg-(--bg-primary) border-l border-(--border-color) overflow-y-auto p-4 space-y-6">
@@ -29,8 +31,11 @@ export function CaseColumn({
           {visibleNpcs.map((npc) => (
             <button
               key={npc.key}
+              disabled={loading}
               onClick={() => onTalkNpc(npc.key)}
-              className="flex items-center gap-2 px-3 py-2 bg-(--bg-secondary) border border-(--border-color) rounded-lg hover:border-(--accent-primary) transition-colors"
+              className={`flex items-center gap-2 px-3 py-2 bg-(--bg-secondary) border rounded-lg transition-colors ${
+                loading ? "border-(--border-color) opacity-50 cursor-not-allowed" : "border-(--border-color) hover:border-(--accent-primary)"
+              }`}
             >
               <svg
                 viewBox="0 0 24 24"

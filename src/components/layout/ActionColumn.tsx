@@ -105,7 +105,7 @@ export function ActionColumn({
           size="sm"
           className="w-full"
           onClick={onInvestigate}
-          disabled={loading}
+          loading={loading}
         >
           🔍 调查当前地点
         </InkButton>
@@ -126,7 +126,7 @@ export function ActionColumn({
                 size="sm"
                 className="w-full justify-start text-left"
                 onClick={() => onMove(location.key)}
-                disabled={loading}
+                loading={loading}
               >
                 <span className="truncate">{location.name}</span>
               </InkButton>
@@ -146,12 +146,12 @@ export function ActionColumn({
             {visibleNpcs.map((npc) => (
               <div
                 key={npc.key}
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
+                onClick={() => !loading && onTalkNpc(npc.key)}
+                className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ${
                   activeNpcKey === npc.key
                     ? "bg-(--bg-tertiary) border-(--accent-primary)"
-                    : "bg-(--bg-secondary) border-(--border-color) hover:border-(--border-hover)"
-                }`}
-                onClick={() => onTalkNpc(npc.key)}
+                    : "bg-(--bg-secondary) border-(--border-color)"
+                } ${loading ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer hover:border-(--border-hover)"}`}
               >
                 <div className="w-10 h-10 rounded-full bg-(--bg-primary) border border-(--border-color) flex items-center justify-center shrink-0">
                   <svg
@@ -182,8 +182,10 @@ export function ActionColumn({
             {investigableClues.map((clue) => (
               <div
                 key={clue.key}
-                className="flex items-center gap-3 p-3 rounded-lg border bg-(--bg-secondary) border-(--border-color) hover:border-(--accent-primary) transition-all duration-200 cursor-pointer"
-                onClick={onInvestigate}
+                onClick={() => !loading && onInvestigate()}
+                className={`flex items-center gap-3 p-3 rounded-lg border bg-(--bg-secondary) border-(--border-color) transition-all duration-200 ${
+                  loading ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer hover:border-(--accent-primary)"
+                }`}
               >
                 <div className="w-10 h-10 rounded bg-(--bg-primary) border border-(--border-color) flex items-center justify-center shrink-0">
                   <svg

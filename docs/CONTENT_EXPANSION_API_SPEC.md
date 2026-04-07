@@ -1,7 +1,7 @@
 # Step 6 内容扩展 API 规范
 
 > 本文档描述当前对外 HTTP 接口约定。
-> 当前版本已将会话 bootstrap 从模板装配改为多轮 AGENT 生成。
+> 当前版本已将会话 bootstrap 从模板装配改为多轮 AGENT 生成，并为首页新建流程补充了实时阶段流。
 > 固定指令：Implementation Plan, Task List and Thought in Chinese
 
 ## 1. 范围
@@ -9,6 +9,7 @@
 当前对外使用以下接口：
 
 - `POST /api/v1/sessions`
+- `POST /api/v1/sessions/bootstrap-stream`
 - `GET /api/v1/sessions`
 - `POST /api/v1/sessions/{session_id}/bootstrap`
 - `GET /api/v1/sessions/{session_id}`
@@ -16,11 +17,12 @@
 
 当前版本不新增：
 
+- 后台异步任务系统
+- 独立任务轮询接口
 - 模板列表查询接口
 - 侦探板接口
 - 知识池接口
 - 隐藏区域专用动作接口
-- 独立后台任务接口
 
 ## 2. 会话创建
 
@@ -70,9 +72,103 @@ POST /api/v1/sessions
 }
 ```
 
-## 3. 会话列表查询
+## 3. 实时创建与世界生成
 
-### 3.1 `GET /api/v1/sessions`
+### 3.1 `POST /api/v1/sessions/bootstrap-stream`
+
+作用：
+
+- 创建一个新的 `draft` 会话
+- 立即进入 `generating`
+- 通过 SSE 按阶段返回创建与世界生成进度
+- 成功后发出最终 `complete` 事件
+- 失败时发出 `error` 事件，并保证会话回退到 `draft`
+
+响应类型：
+
+- `Content-Type: text/event-stream`
+
+事件类型：
+
+- `stage`
+- `complete`
+- `error`
+
+`stage` 事件字段：
+
+- `placeholder`：阶段占位符，供前端自行翻译
+- `session_id`：从 `session_created` 开始返回
+- `attempt`：仅 `world_validating / world_fixing` 相关阶段按需返回
+- `max_attempts`：仅校验修正链路按需返回
+
+当前阶段占位符枚举：
+
+- `session_creating`
+- `session_created`
+- `world_planning`
+- `world_generating`
+- `world_validating`
+- `world_fixing`
+- `world_persisting`
+- `world_ready`
+
+阶段流示例：
+
+```text
+event: stage
+data: {"placeholder":"session_creating"}
+
+event: stage
+data: {"placeholder":"session_created","session_id":"..."}
+
+event: stage
+data: {"placeholder":"world_planning","session_id":"..."}
+
+event: stage
+data: {"placeholder":"world_generating","session_id":"..."}
+
+event: stage
+data: {"placeholder":"world_validating","session_id":"...","attempt":1,"max_attempts":3}
+
+event: stage
+data: {"placeholder":"world_persisting","session_id":"..."}
+
+event: stage
+data: {"placeholder":"world_ready","session_id":"..."}
+
+event: complete
+data: {"session_id":"...","status":"ready","created_counts":{"characters":3},"root_ids":{"player_id":"...","map_id":"..."}}
+```
+
+`complete` 事件语义：
+
+- 与 `POST /api/v1/sessions/{session_id}/bootstrap` 的成功响应等价
+- 前端可直接从 `root_ids.player_id` 和 `session_id` 进入游戏
+
+`error` 事件字段：
+
+- `code`
+- `message`
+- `session_id`：若空会话已创建则返回
+- `failed_placeholder`：失败发生时最近一个阶段占位符
+
+`error` 示例：
+
+```text
+event: error
+data: {"code":"generation_failed","message":"Generated world blueprint failed validation.","session_id":"...","failed_placeholder":"world_validating"}
+```
+
+失败语义：
+
+- `generation_failed`：AGENT 输出通过 JSON 解析，但未通过本地业务校验
+- `generation_output_invalid`：AGENT 输出无法解析为结构化结果
+- `generation_provider_error`：模型 provider 不可用、超时或调用失败
+- `internal_error`：其他未分类错误
+
+## 4. 会话列表查询
+
+### 4.1 `GET /api/v1/sessions`
 
 说明：
 
@@ -111,9 +207,9 @@ GET /api/v1/sessions
 ]
 ```
 
-## 4. 世界初始化
+## 5. 世界初始化（兼容接口）
 
-### 4.1 `POST /api/v1/sessions/{session_id}/bootstrap`
+### 5.1 `POST /api/v1/sessions/{session_id}/bootstrap`
 
 作用：
 
@@ -123,6 +219,11 @@ GET /api/v1/sessions
 - 生成地图、NPC、线索、事件与 truth payload
 - 校验结构合法性后一次性落库
 - 成功后将会话状态切为 `ready`
+
+说明：
+
+- 该接口继续保留，供兼容调用使用
+- 首页新建流程优先使用 `POST /api/v1/sessions/bootstrap-stream`
 
 成功响应示例：
 
@@ -169,9 +270,9 @@ GET /api/v1/sessions
 }
 ```
 
-## 5. 会话读取
+## 6. 会话读取
 
-### 5.1 `GET /api/v1/sessions/{session_id}`
+### 6.1 `GET /api/v1/sessions/{session_id}`
 
 说明：
 
@@ -237,9 +338,9 @@ GET /api/v1/sessions
 - `ready`
 - `ended`
 
-## 6. 动作提交
+## 7. 动作提交
 
-### 6.1 `POST /api/v1/actions`
+### 7.1 `POST /api/v1/actions`
 
 当前仍支持：
 
@@ -249,7 +350,7 @@ GET /api/v1/sessions
 - `gather`
 - `accuse`
 
-### 6.2 状态前置约束
+### 7.2 状态前置约束
 
 动作提交前会校验会话状态：
 
@@ -257,23 +358,35 @@ GET /api/v1/sessions
 - `generating`：返回 `409`，detail 为 `Session world state is currently being generated.`
 - `ended`：返回 `409`，detail 为 `Session has already ended.`
 
-### 6.3 其他动作语义
+### 7.3 AI 生成记录
+
+每次动作请求在经过叙事 runtime 后，都会把本次生成结果追加写入会话历史目录下的 `ai_generation_log.jsonl`。
+
+当前 `storage_refs` 中会返回：
+
+- `ai_generation_log`：本次会话级 AI 生成日志文件路径
+- `latest_action_log`：最近一次动作摘要 JSON 文件路径
+- `history_markdown`：动作历史 Markdown 文件路径
+
+`ai_generation_log.jsonl` 中每一行都是一条独立 JSON，包含：
+
+- `action_type`
+- `status`
+- `runtime_metadata`
+- `raw_output_text`
+- `result`
+
+### 7.4 其他动作语义
 
 当前 `move / talk / investigate / gather / accuse` 的引擎语义保持不变。
 
-现阶段变化重点在于：
-
-- 世界来源已从模板装配切换为 AGENT 生成
-- truth、地点、角色和线索的具体内容不再由固定模板 key 决定
-- 动作层仍消费同一套运行态数据库结构
-
-## 7. 当前结论
+## 8. 当前结论
 
 当前版本对外 API 的关键变化是：
 
-- `POST /sessions` 改为空请求体
-- 新增 `GET /sessions` 查询全部会话
-- `GET /sessions/{id}` 补充返回 `root_ids`，用于前端继续游戏
-- `bootstrap` 改为多轮 AGENT 生成完整游戏
-- 会话新增 `generating` 状态
-- `title` 改为在 bootstrap 成功后生成并回写
+- `POST /sessions` 继续保留为空请求体创建空会话
+- 新增 `POST /sessions/bootstrap-stream`，用于首页实时创建与阶段显示
+- `GET /sessions` 继续返回全部会话列表
+- `GET /sessions/{id}` 继续返回 `root_ids`，用于前端继续游戏
+- `bootstrap` 兼容接口继续保留，但不再是首页新建流程的首选入口
+- 前端阶段名称不由后端返回，而是由前端基于占位符自行翻译

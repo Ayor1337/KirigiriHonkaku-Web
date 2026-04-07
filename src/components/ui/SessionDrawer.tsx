@@ -91,23 +91,22 @@ export function SessionDrawer({
       <div
         ref={panelRef}
         className={`
-          absolute right-0 top-0 h-full
-          w-full max-w-md
-          bg-(--bg-primary) border-l border-(--border-color)
-          shadow-2xl
+          absolute bottom-0 left-1/2 -translate-x-1/2
+          w-[60%] h-7/8
           transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
+          ${isOpen ? "translate-y-0" : "translate-y-full"}
           flex flex-col
         `}
       >
         {/* 头部 */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-(--border-color)">
+        <div className="relative flex items-center justify-center py-5">
           <h2 className="font-serif text-xl tracking-wide text-(--text-primary)">
             历史调查
           </h2>
           <button
             onClick={onClose}
             className="
+              absolute right-0 top-1/2 -translate-y-1/2
               w-9 h-9 flex items-center justify-center
               rounded-lg border border-(--border-color)
               text-(--text-secondary)
@@ -129,7 +128,7 @@ export function SessionDrawer({
         </div>
 
         {/* 内容区 */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto py-6">
           {resumeError && (
             <div className="mb-4 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-sm text-red-200 flex items-start gap-2">
               <svg
@@ -176,7 +175,9 @@ export function SessionDrawer({
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
               <div className="text-3xl mb-3">⚠️</div>
               <p className="text-(--text-primary) font-serif mb-2">加载失败</p>
-              <p className="text-sm text-(--text-secondary) max-w-xs">{error}</p>
+              <p className="text-sm text-(--text-secondary) max-w-xs">
+                {error}
+              </p>
             </div>
           ) : sessions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
@@ -191,8 +192,12 @@ export function SessionDrawer({
                   <path d="M12 6v6l4 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="font-serif text-(--text-primary) mb-1">尚无尘封的案卷</p>
-              <p className="text-sm text-(--text-muted)">开始一次新的调查，写下第一页记录。</p>
+              <p className="font-serif text-(--text-primary) mb-1">
+                尚无尘封的案卷
+              </p>
+              <p className="text-sm text-(--text-muted)">
+                开始一次新的调查，写下第一页记录。
+              </p>
             </div>
           ) : (
             <div className="space-y-4">

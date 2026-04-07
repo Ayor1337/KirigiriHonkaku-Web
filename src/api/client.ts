@@ -3,7 +3,9 @@
 
 import type {
   SessionResponse,
+  SessionBootstrapErrorEvent,
   SessionBootstrapResponse,
+  SessionBootstrapStageEvent,
   ActionRequest,
   ActionResult,
 } from "../types/api";
@@ -20,6 +22,20 @@ export class ApiError extends Error {
     this.name = "ApiError";
     this.status = status;
     this.detail = detail;
+  }
+}
+
+export class BootstrapStreamError extends Error {
+  code: string;
+  sessionId?: string;
+  failedPlaceholder?: string;
+
+  constructor(payload: SessionBootstrapErrorEvent) {
+    super(payload.message);
+    this.name = "BootstrapStreamError";
+    this.code = payload.code;
+    this.sessionId = payload.session_id;
+    this.failedPlaceholder = payload.failed_placeholder;
   }
 }
 
@@ -46,12 +62,108 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+interface BootstrapSessionStreamOptions {
+  onStage?: (event: SessionBootstrapStageEvent) => void;
+}
+
+interface ParsedSseEvent {
+  event: string;
+  data: unknown;
+}
+
 /** 创建会话（Step 6 改为空请求体） */
 export function createSession(): Promise<SessionResponse> {
   return request<SessionResponse>(`${API_PREFIX}/sessions`, {
     method: "POST",
     body: JSON.stringify({}),
   });
+}
+
+/** 流式创建并生成世界 */
+export async function bootstrapSessionStream(
+  options: BootstrapSessionStreamOptions = {},
+): Promise<SessionBootstrapResponse> {
+  const res = await fetch(`${API_PREFIX}/sessions/bootstrap-stream`, {
+    method: "POST",
+    headers: {
+      Accept: "text/event-stream",
+    },
+  });
+
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      const body = await res.json();
+      detail = body.detail || JSON.stringify(body);
+    } catch {
+      // ignore
+    }
+    throw new ApiError(res.status, detail);
+  }
+
+  if (!res.body) {
+    throw new Error("浏览器不支持流式响应读取");
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    buffer += decoder.decode(value ?? new Uint8Array(), { stream: !done });
+
+    let delimiterIndex = buffer.indexOf("\n\n");
+    while (delimiterIndex >= 0) {
+      const block = buffer.slice(0, delimiterIndex);
+      buffer = buffer.slice(delimiterIndex + 2);
+      const parsed = parseSseBlock(block);
+      if (parsed) {
+        if (parsed.event === "stage") {
+          options.onStage?.(parsed.data as SessionBootstrapStageEvent);
+        } else if (parsed.event === "complete") {
+          return parsed.data as SessionBootstrapResponse;
+        } else if (parsed.event === "error") {
+          throw new BootstrapStreamError(parsed.data as SessionBootstrapErrorEvent);
+        }
+      }
+      delimiterIndex = buffer.indexOf("\n\n");
+    }
+
+    if (done) {
+      break;
+    }
+  }
+
+  throw new Error("创建流程在完成前中断");
+}
+
+function parseSseBlock(block: string): ParsedSseEvent | null {
+  const trimmed = block.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  let eventName = "message";
+  const dataLines: string[] = [];
+
+  for (const line of trimmed.split("\n")) {
+    if (line.startsWith("event: ")) {
+      eventName = line.slice(7).trim();
+    }
+    if (line.startsWith("data: ")) {
+      dataLines.push(line.slice(6));
+    }
+  }
+
+  if (dataLines.length === 0) {
+    return null;
+  }
+
+  return {
+    event: eventName,
+    data: JSON.parse(dataLines.join("\n")),
+  };
 }
 
 /** 读取会话元数据 */

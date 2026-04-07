@@ -2,12 +2,14 @@
 // 游戏会话状态管理 — 封装 API 调用和场景状态
 
 import { useState, useCallback, useRef } from "react";
-import { createSession, bootstrapSession, submitAction } from "../api/client";
+import { bootstrapSessionStream, submitAction } from "../api/client";
 import type {
   SceneSnapshot,
   StateDeltaSummary,
   ActionType,
   InvestigableClue,
+  SessionBootstrapStageEvent,
+  SessionBootstrapStageKey,
 } from "../types/api";
 
 /** 已发现线索记录（前端累积追踪） */
@@ -34,6 +36,8 @@ interface GameSessionState {
   visitedLocations: VisitedLocation[];
   loading: boolean;
   error: string | null;
+  creationStageKey: SessionBootstrapStageKey | null;
+  creationStageMeta: SessionBootstrapStageEvent | null;
 }
 
 // Step 6: 模板选择已移除，会话创建改为空请求体，世界由 AGENT 生成
@@ -49,6 +53,8 @@ export function useGameSession() {
     visitedLocations: [],
     loading: false,
     error: null,
+    creationStageKey: null,
+    creationStageMeta: null,
   });
 
   // actor_id 需要在多次 action 间保持一致
@@ -133,17 +139,30 @@ export function useGameSession() {
 
   /** 创建并初始化游戏（Step 6: 空请求体，AGENT 生成世界） */
   const startGame = useCallback(async () => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({
+      ...prev,
+      loading: true,
+      error: null,
+      creationStageKey: null,
+      creationStageMeta: null,
+    }));
 
     try {
-      // 1. 创建会话
-      const session = await createSession();
+      const bootstrap = await bootstrapSessionStream({
+        onStage: (event) => {
+          if (event.session_id) {
+            sessionIdRef.current = event.session_id;
+          }
+          setState((prev) => ({
+            ...prev,
+            sessionId: event.session_id ?? prev.sessionId,
+            creationStageKey: event.placeholder,
+            creationStageMeta: event,
+          }));
+        },
+      });
 
-      const sessionId = String(session.id);
-
-      // 2. Bootstrap 世界
-      const bootstrap = await bootstrapSession(sessionId);
-
+      const sessionId = bootstrap.session_id;
       const playerId = bootstrap.root_ids.player_id;
       sessionIdRef.current = sessionId;
       playerIdRef.current = playerId;
@@ -154,7 +173,7 @@ export function useGameSession() {
         playerId,
       }));
 
-      // 3. 首次 investigate 获取初始 scene_snapshot
+      // 首次 investigate 获取初始 scene_snapshot
       const result = await submitAction({
         session_id: sessionId,
         action_type: "investigate",
@@ -185,12 +204,20 @@ export function useGameSession() {
         }),
         loading: false,
         error: null,
+        creationStageKey: null,
+        creationStageMeta: null,
       }));
 
       return { sessionId, playerId };
     } catch (err) {
       const message = err instanceof Error ? err.message : "游戏创建失败";
-      setState((prev) => ({ ...prev, loading: false, error: message }));
+      setState((prev) => ({
+        ...prev,
+        loading: false,
+        error: message,
+        creationStageKey: null,
+        creationStageMeta: null,
+      }));
       throw err;
     }
   }, []);
