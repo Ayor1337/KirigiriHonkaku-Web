@@ -12,6 +12,8 @@ import type {
   SessionBootstrapStageEvent,
   ActionRequest,
   ActionResult,
+  DialogueDetail,
+  LatestDialogue,
 } from "../types/api";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -217,6 +219,23 @@ export function bootstrapSession(
   return request<SessionBootstrapResponse>(
     `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/bootstrap`,
     { method: "POST" },
+  );
+}
+
+/** 读取单条对话详情 */
+export function getDialogue(
+  sessionId: string,
+  dialogueId: string,
+): Promise<DialogueDetail> {
+  return request<DialogueDetail>(
+    `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/dialogues/${encodeURIComponent(dialogueId)}`,
+  );
+}
+
+/** 读取会话对话列表 */
+export function getSessionDialogues(sessionId: string): Promise<LatestDialogue[]> {
+  return request<LatestDialogue[]>(
+    `${API_PREFIX}/sessions/${encodeURIComponent(sessionId)}/dialogues`,
   );
 }
 

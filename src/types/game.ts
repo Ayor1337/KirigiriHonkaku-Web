@@ -637,9 +637,7 @@ export interface Dialogue {
   start_minute: GameTime;
   end_minute: GameTime | null;
 
-  // 结果信息（文本附件路径）
-  summary_file_path: string | null;
-  transcript_file_path: string | null;
+  // 结果信息
   tag_flags: Record<string, unknown>;
 
   // 审计信息

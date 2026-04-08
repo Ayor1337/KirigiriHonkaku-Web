@@ -25,6 +25,49 @@ export function InvestigationLayout() {
   const [activeNpcKey, setActiveNpcKey] = useState<string | undefined>();
   const [newClueKeys, setNewClueKeys] = useState<string[]>([]);
 
+  const scene = game.scene;
+  const details = scene?.details;
+
+  // 页面标题同步
+  useEffect(() => {
+    if (game.loading && !scene) {
+      document.title = "正在加载调查... | 霧切本格";
+      return;
+    }
+    if (game.error && !scene) {
+      document.title = "调查初始化失败 | 霧切本格";
+      return;
+    }
+    if (!scene || !details) {
+      document.title = "等待场景数据... | 霧切本格";
+      return;
+    }
+
+    const base = "霧切本格";
+    switch (viewState) {
+      case "investigation":
+        document.title = `${details.current_location.name} | 调查中 | ${base}`;
+        break;
+      case "dialogue":
+        document.title = `对话中 | ${base}`;
+        break;
+      case "feedback":
+        document.title = `调查结果 | ${base}`;
+        break;
+      case "board":
+        document.title = `侦探板 | ${base}`;
+        break;
+      case "map":
+        document.title = `地图 | ${base}`;
+        break;
+      case "profile":
+        document.title = `人物档案 | ${base}`;
+        break;
+      default:
+        document.title = base;
+    }
+  }, [game.loading, game.error, scene, details, viewState]);
+
   // 初始化：从 URL 参数获取 sessionId/playerId，或创建新游戏
   useEffect(() => {
     const sessionId = searchParams.get("sessionId");
@@ -43,9 +86,6 @@ export function InvestigationLayout() {
       setNewClueKeys(game.lastDelta.investigation.discovered_clues);
     }
   }, [game.lastDelta]);
-
-  const scene = game.scene;
-  const details = scene?.details;
 
   // 加载中
   if (game.loading && !scene) {
@@ -90,10 +130,15 @@ export function InvestigationLayout() {
 
   const handleTalkNpc = (npcKey: string) => {
     setActiveNpcKey(npcKey);
-    game.talk(npcKey).then(() => {
+    game.talk(npcKey, "").then(() => {
       setViewState("dialogue");
       setActiveNavId("records");
     });
+  };
+
+  const handleSendTalkMessage = (text: string) => {
+    if (!activeNpcKey) return;
+    game.talk(activeNpcKey, text);
   };
 
   const handleInvestigate = () => {
@@ -169,12 +214,15 @@ export function InvestigationLayout() {
           playerProfile={game.playerProfile}
           mapData={game.mapData}
           npcs={game.npcs}
+          currentDialogue={game.currentDialogue}
+          dialogueLoading={game.dialogueLoading}
           onTalkNpc={handleTalkNpc}
           onInvestigate={handleInvestigate}
           onMove={handleMove}
           onBackToInvestigation={handleBackToInvestigation}
           onFeedbackComplete={handleFeedbackComplete}
           onBackFromProfile={handleBackFromProfile}
+          onSendTalkMessage={handleSendTalkMessage}
           loading={game.loading}
         />
 
@@ -194,6 +242,8 @@ export function InvestigationLayout() {
           discoveredClueCount={game.discoveredClues.length}
           visitedLocationCount={game.visitedLocations.length}
           exposureLevel={details.exposure.level}
+          activeNpcKey={activeNpcKey}
+          currentDialogue={game.currentDialogue}
         />
       </div>
 

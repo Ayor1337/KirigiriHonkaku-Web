@@ -96,7 +96,6 @@ export interface SessionResponse {
   status: string;
   start_time_minute: number;
   current_time_minute: number;
-  data_directories?: Record<string, string>;
   root_ids?: {
     player_id?: string;
     map_id?: string;
@@ -182,16 +181,54 @@ export interface VisibleNpc {
 export interface InvestigableClue {
   key: string;
   name: string;
-  clue_type: string;
+  clue_type: string | { key?: string; name?: string; clue_type?: unknown };
+}
+
+export function getClueTypeLabel(clueType: unknown): string {
+  if (typeof clueType === "string") return clueType;
+  if (clueType && typeof clueType === "object") {
+    const obj = clueType as { name?: string; key?: string };
+    if (typeof obj.name === "string") return obj.name;
+    if (typeof obj.key === "string") return obj.key;
+  }
+  return "unknown";
 }
 
 export interface LatestDialogue {
   dialogue_id: string;
   target_npc_key: string | null;
+  target_npc_name: string | null;
+  location_id: string;
   location_key: string;
+  location_name: string;
   start_minute: number;
   end_minute: number;
-  participant_keys: string[];
+  utterance_count: number;
+  last_utterance_preview: string | null;
+}
+
+export interface Utterance {
+  sequence_no: number;
+  speaker_role: "player" | "npc" | "narrator" | "system";
+  speaker_name: string;
+  content: string;
+  tone_tag?: string | null;
+  utterance_flags?: Record<string, unknown>;
+}
+
+export interface DialogueDetail {
+  dialogue_id: string;
+  target_npc_key: string;
+  target_npc_name: string;
+  location_id: string;
+  location_key: string;
+  location_name: string;
+  start_minute: number;
+  end_minute: number;
+  utterance_count: number;
+  last_utterance_preview: string;
+  tag_flags: Record<string, string>;
+  utterances: Utterance[];
 }
 
 export interface PublicContext {
@@ -250,6 +287,10 @@ export interface MovementDelta {
   to_location_key: string;
 }
 
+export interface DialogueDelta {
+  dialogue_id: string | null;
+}
+
 export interface StateDeltaSummary {
   hard_state_updated: boolean;
   current_time_minute: number;
@@ -258,7 +299,7 @@ export interface StateDeltaSummary {
   module_outputs: Record<string, unknown>;
   movement: MovementDelta | null;
   investigation: InvestigationDelta;
-  dialogue: Record<string, unknown> | null;
+  dialogue: DialogueDelta | null;
   exposure: ExposureInfo;
   risk: RiskInfo;
   public_context: PublicContext;
@@ -286,7 +327,6 @@ export interface ActionResult {
   ai_tasks: AiTask[];
   soft_state_patch: SoftStatePatch;
   narrative_text: string | null;
-  storage_refs: Record<string, string>;
   errors: string[];
 }
 

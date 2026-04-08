@@ -1,14 +1,19 @@
 // src/hooks/useGameSession.ts
 // 游戏会话状态管理 — 封装 API 调用和场景状态
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   bootstrapSessionStream,
   submitAction,
   getSessionPlayer,
   getSessionMap,
   getSessionNPCs,
+  getDialogue,
+  getSessionDialogues,
 } from "../api/client";
+import {
+  getClueTypeLabel,
+} from "../types/api";
 import type {
   SceneSnapshot,
   StateDeltaSummary,
@@ -19,6 +24,8 @@ import type {
   SessionPlayer,
   SessionMap,
   SessionNpc,
+  DialogueDetail,
+  LatestDialogue,
 } from "../types/api";
 
 /** 已发现线索记录（前端累积追踪） */
@@ -50,6 +57,72 @@ interface GameSessionState {
   playerProfile: SessionPlayer | null;
   mapData: SessionMap | null;
   npcs: SessionNpc[];
+  dialogues: LatestDialogue[];
+  currentDialogue: DialogueDetail | null;
+  dialogueLoading: boolean;
+}
+
+const CACHE_PREFIX = "kirigiri:session:";
+const CACHE_MAX_COUNT = 3;
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface SessionCache {
+  scene: SceneSnapshot;
+  lastDelta: StateDeltaSummary | null;
+  narrativeText: string | null;
+  discoveredClues: DiscoveredClue[];
+  visitedLocations: VisitedLocation[];
+  playerProfile: SessionPlayer | null;
+  mapData: SessionMap | null;
+  npcs: SessionNpc[];
+  dialogues: LatestDialogue[];
+  currentDialogue: DialogueDetail | null;
+  cachedAt: number;
+}
+
+function getCacheKey(sessionId: string) {
+  return `${CACHE_PREFIX}${sessionId}`;
+}
+
+function saveSessionCache(sessionId: string, data: Omit<SessionCache, "cachedAt">) {
+  try {
+    const cache: SessionCache = { ...data, cachedAt: Date.now() };
+    localStorage.setItem(getCacheKey(sessionId), JSON.stringify(cache));
+
+    const keys: { key: string; cachedAt: number }[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith(CACHE_PREFIX)) {
+        try {
+          const v = JSON.parse(localStorage.getItem(k) || "{}") as SessionCache;
+          keys.push({ key: k, cachedAt: v.cachedAt || 0 });
+        } catch {
+          // ignore
+        }
+      }
+    }
+    keys.sort((a, b) => b.cachedAt - a.cachedAt);
+    for (let i = CACHE_MAX_COUNT; i < keys.length; i++) {
+      localStorage.removeItem(keys[i].key);
+    }
+  } catch {
+    // 存储失败静默处理
+  }
+}
+
+function loadSessionCache(sessionId: string): SessionCache | null {
+  try {
+    const raw = localStorage.getItem(getCacheKey(sessionId));
+    if (!raw) return null;
+    const cache = JSON.parse(raw) as SessionCache;
+    if (!cache.cachedAt || Date.now() - cache.cachedAt > CACHE_TTL_MS) {
+      localStorage.removeItem(getCacheKey(sessionId));
+      return null;
+    }
+    return cache;
+  } catch {
+    return null;
+  }
 }
 
 // Step 6: 模板选择已移除，会话创建改为空请求体，世界由 AGENT 生成
@@ -70,11 +143,44 @@ export function useGameSession() {
     playerProfile: null,
     mapData: null,
     npcs: [],
+    dialogues: [],
+    currentDialogue: null,
+    dialogueLoading: false,
   });
 
   // actor_id 需要在多次 action 间保持一致
   const playerIdRef = useRef<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+
+  // 当核心场景数据变化时自动写入本地缓存
+  useEffect(() => {
+    if (state.sessionId && state.scene) {
+      saveSessionCache(state.sessionId, {
+        scene: state.scene,
+        lastDelta: state.lastDelta,
+        narrativeText: state.narrativeText,
+        discoveredClues: state.discoveredClues,
+        visitedLocations: state.visitedLocations,
+        playerProfile: state.playerProfile,
+        mapData: state.mapData,
+        npcs: state.npcs,
+        dialogues: state.dialogues,
+        currentDialogue: state.currentDialogue,
+      });
+    }
+  }, [
+    state.sessionId,
+    state.scene,
+    state.lastDelta,
+    state.narrativeText,
+    state.discoveredClues,
+    state.visitedLocations,
+    state.playerProfile,
+    state.mapData,
+    state.npcs,
+    state.dialogues,
+    state.currentDialogue,
+  ]);
 
   /** 提交动作的内部方法 */
   const doAction = useCallback(
@@ -108,7 +214,7 @@ export function useGameSession() {
                 newClues.push({
                   key: clueKey,
                   name: clueInfo?.name ?? clueKey,
-                  clue_type: clueInfo?.clue_type ?? "unknown",
+                  clue_type: getClueTypeLabel(clueInfo?.clue_type),
                   discovered_at_minute:
                     result.scene_snapshot.current_time_minute,
                 });
@@ -147,6 +253,29 @@ export function useGameSession() {
           getSessionNPCs(sessionIdRef.current)
             .then((npcs) => {
               setState((prev) => ({ ...prev, npcs }));
+            })
+            .catch(() => {
+              // 忽略刷新失败
+            });
+        }
+
+        // 异步拉取对话详情与会话对话列表
+        const dialogueId = result.state_delta_summary.dialogue?.dialogue_id;
+        if (dialogueId && sessionIdRef.current) {
+          setState((prev) => ({ ...prev, dialogueLoading: true }));
+          getDialogue(sessionIdRef.current, dialogueId)
+            .then((detail) => {
+              setState((prev) => ({ ...prev, currentDialogue: detail }));
+            })
+            .catch(() => {
+              // 忽略刷新失败
+            })
+            .finally(() => {
+              setState((prev) => ({ ...prev, dialogueLoading: false }));
+            });
+          getSessionDialogues(sessionIdRef.current)
+            .then((dialogues) => {
+              setState((prev) => ({ ...prev, dialogues }));
             })
             .catch(() => {
               // 忽略刷新失败
@@ -238,7 +367,7 @@ export function useGameSession() {
           return {
             key: clueKey,
             name: info?.name ?? clueKey,
-            clue_type: info?.clue_type ?? "unknown",
+            clue_type: getClueTypeLabel(info?.clue_type),
             discovered_at_minute: result.scene_snapshot.current_time_minute,
           };
         }),
@@ -265,11 +394,52 @@ export function useGameSession() {
     }
   }, []);
 
-  /** 用已有 sessionId 恢复（提交一次 investigate 获取当前场景） */
+  /** 用已有 sessionId 恢复（优先读取本地缓存，命中则跳过 investigate） */
   const resumeGame = useCallback(
     async (sessionId: string, playerId: string) => {
       sessionIdRef.current = sessionId;
       playerIdRef.current = playerId;
+
+      const cached = loadSessionCache(sessionId);
+      if (cached) {
+        setState((prev) => ({
+          ...prev,
+          sessionId,
+          playerId,
+          scene: cached.scene,
+          lastDelta: cached.lastDelta,
+          narrativeText: cached.narrativeText,
+          discoveredClues: cached.discoveredClues,
+          visitedLocations: cached.visitedLocations,
+          playerProfile: cached.playerProfile,
+          mapData: cached.mapData,
+          npcs: cached.npcs,
+          dialogues: cached.dialogues ?? [],
+          currentDialogue: cached.currentDialogue ?? null,
+          loading: false,
+          error: null,
+        }));
+
+        // 异步刷新辅助元数据（不修改游戏状态）
+        Promise.all([
+          getSessionPlayer(sessionId),
+          getSessionMap(sessionId),
+          getSessionNPCs(sessionId),
+        ])
+          .then(([playerProfile, mapData, npcs]) => {
+            setState((prev) => ({
+              ...prev,
+              playerProfile: playerProfile ?? null,
+              mapData: mapData ?? null,
+              npcs: npcs ?? [],
+            }));
+          })
+          .catch(() => {
+            // 忽略刷新失败
+          });
+        return;
+      }
+
       setState((prev) => ({
         ...prev,
         sessionId,
@@ -309,9 +479,25 @@ export function useGameSession() {
   );
 
   const talk = useCallback(
-    (targetNpcKey: string) =>
-      doAction("talk", { target_npc_key: targetNpcKey }),
+    (targetNpcKey: string, text: string = "") =>
+      doAction("talk", { target_npc_key: targetNpcKey, text }),
     [doAction],
+  );
+
+  const fetchDialogue = useCallback(
+    async (dialogueId: string) => {
+      if (!sessionIdRef.current) return;
+      setState((prev) => ({ ...prev, dialogueLoading: true }));
+      try {
+        const detail = await getDialogue(sessionIdRef.current, dialogueId);
+        setState((prev) => ({ ...prev, currentDialogue: detail }));
+      } catch {
+        // 忽略刷新失败
+      } finally {
+        setState((prev) => ({ ...prev, dialogueLoading: false }));
+      }
+    },
+    [],
   );
 
   const investigate = useCallback(
@@ -336,5 +522,6 @@ export function useGameSession() {
     investigate,
     gather,
     accuse,
+    fetchDialogue,
   };
 }

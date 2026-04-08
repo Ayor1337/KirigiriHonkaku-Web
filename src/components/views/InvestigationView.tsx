@@ -1,5 +1,6 @@
 // src/components/views/InvestigationView.tsx
 import { InkButton } from "../ui/InkButton";
+import { getClueTypeLabel } from "../../types/api";
 import type {
   SceneLocation,
   VisibleNpc,
@@ -129,7 +130,7 @@ export function InvestigationView({
                   </span>
                 </div>
                 <p className="text-sm text-(--text-secondary)">
-                  {clue.clue_type}
+                  {getClueTypeLabel(clue.clue_type)}
                 </p>
               </div>
             ))}

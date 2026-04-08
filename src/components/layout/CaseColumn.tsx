@@ -1,8 +1,10 @@
+import { getClueTypeLabel } from "../../types/api";
 import type {
   VisibleNpc,
   SceneLocation,
   ReachableLocation,
   SessionNpc,
+  DialogueDetail,
 } from "../../types/api";
 import type { DiscoveredClue } from "../../hooks/useGameSession";
 
@@ -29,6 +31,8 @@ interface CaseColumnProps {
   discoveredClueCount?: number;
   visitedLocationCount?: number;
   exposureLevel?: string;
+  activeNpcKey?: string;
+  currentDialogue?: DialogueDetail | null;
 }
 
 export function CaseColumn({
@@ -46,6 +50,8 @@ export function CaseColumn({
   discoveredClueCount,
   visitedLocationCount,
   exposureLevel,
+  activeNpcKey,
+  currentDialogue,
 }: CaseColumnProps) {
   const renderSectionTitle = (title: string) => (
     <h3 className="text-xs font-medium text-(--text-muted) uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -94,7 +100,7 @@ export function CaseColumn({
             <h4 className="font-heading text-sm text-(--accent-primary) mb-1">
               {clue.name}
             </h4>
-            <div className="text-xs text-(--text-muted)">{clue.clue_type}</div>
+            <div className="text-xs text-(--text-muted)">{getClueTypeLabel(clue.clue_type)}</div>
             {newClueKeys.includes(clue.key) && (
               <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-(--accent-primary) text-white rounded">
                 新
@@ -233,23 +239,17 @@ export function CaseColumn({
 
   // ========== dialogue ==========
   if (viewState === "dialogue") {
+    const activeNpc = npcs.find((n) => n.character_id === activeNpcKey);
     const metNpcs = npcs.filter((n) => n.has_met_player);
+
     return (
-      <aside className="h-full bg-(--bg-primary) border-l border-(--border-color) overflow-y-auto p-4 space-y-6">
-        <section>
-          {renderSectionTitle("对话过的人")}
-          <div className="space-y-2">
-            {metNpcs.map((npc) => (
-              <button
-                key={npc.character_id}
-                disabled={loading}
-                onClick={() => onTalkNpc(npc.character_id)}
-                className={`w-full text-left flex items-center gap-3 px-3 py-3 bg-(--bg-secondary) border rounded-lg transition-colors ${
-                  loading
-                    ? "border-(--border-color) opacity-50 cursor-not-allowed"
-                    : "border-(--border-color) hover:border-(--accent-primary)"
-                }`}
-              >
+      <aside className="h-full bg-(--bg-primary) border-l border-(--border-color) overflow-y-auto p-4 space-y-5">
+        {/* A. NPC 资料卡 */}
+        {activeNpc && (
+          <section>
+            {renderSectionTitle("当前对话")}
+            <div className="p-3 bg-(--bg-secondary) border border-(--border-color) rounded-lg space-y-2">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-(--bg-primary) border border-(--border-color) flex items-center justify-center shrink-0">
                   <svg
                     viewBox="0 0 24 24"
@@ -259,21 +259,95 @@ export function CaseColumn({
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                   </svg>
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0">
                   <div className="font-medium text-(--text-primary) truncate">
-                    {npc.display_name}
+                    {activeNpc.display_name}
                   </div>
-                  {npc.public_identity && (
+                  {activeNpc.public_identity && (
                     <div className="text-xs text-(--text-muted) truncate">
-                      {npc.public_identity}
-                    </div>
-                  )}
-                  {npc.current_location_name && (
-                    <div className="text-xs text-(--accent-primary) truncate">
-                      位于 {npc.current_location_name}
+                      {activeNpc.public_identity}
                     </div>
                   )}
                 </div>
+              </div>
+              {activeNpc.current_location_name && (
+                <div className="text-xs text-(--accent-primary) pt-1 border-t border-(--border-color)">
+                  位于 {activeNpc.current_location_name}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* B. 对话氛围 */}
+        {currentDialogue?.tag_flags &&
+          Object.keys(currentDialogue.tag_flags).length > 0 && (
+            <section>
+              {renderSectionTitle("对话氛围")}
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(currentDialogue.tag_flags).map(([k, v]) => (
+                  <span
+                    key={k}
+                    className="px-2 py-1 text-xs bg-(--bg-secondary) border border-(--border-color) rounded text-(--text-secondary)"
+                  >
+                    {k}: {v}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
+        {/* C. 话题提示 */}
+        {discoveredClues.length > 0 && (
+          <section>
+            {renderSectionTitle("话题提示")}
+            <div className="space-y-2">
+              {discoveredClues
+                .slice(-4)
+                .reverse()
+                .map((clue) => (
+                  <button
+                    key={clue.key}
+                    disabled={loading}
+                    onClick={() =>
+                      activeNpcKey && onTalkNpc(activeNpcKey)
+                    }
+                    className={`w-full text-left px-3 py-2 bg-(--bg-secondary) border border-(--border-color) rounded-lg transition-colors ${
+                      loading
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:border-(--accent-primary)"
+                    }`}
+                  >
+                    <div className="text-xs text-(--accent-primary) mb-0.5 truncate">
+                      {clue.name}
+                    </div>
+                    <div className="text-[11px] text-(--text-muted) truncate">
+                      试试问关于这条线索的事...
+                    </div>
+                  </button>
+                ))}
+            </div>
+          </section>
+        )}
+
+        {/* D. 对话过的人（紧凑列表） */}
+        <section>
+          {renderSectionTitle("对话过的人")}
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {metNpcs.map((npc) => (
+              <button
+                key={npc.character_id}
+                disabled={loading || npc.character_id === activeNpcKey}
+                onClick={() => onTalkNpc(npc.character_id)}
+                className={`w-full text-left flex items-center gap-2 px-2 py-2 bg-(--bg-secondary) border rounded-lg transition-colors ${
+                  npc.character_id === activeNpcKey
+                    ? "border-(--accent-primary) opacity-80"
+                    : "border-(--border-color) hover:border-(--accent-primary)"
+                }`}
+              >
+                <span className="text-sm text-(--text-primary) truncate">
+                  {npc.display_name}
+                </span>
               </button>
             ))}
             {metNpcs.length === 0 && (

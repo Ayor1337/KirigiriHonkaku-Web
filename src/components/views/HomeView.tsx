@@ -60,6 +60,10 @@ export function HomeView() {
   const subtitle = "KIRIGIRI HONKAKU";
 
   useEffect(() => {
+    document.title = "霧切本格 | Kirigiri Honkaku";
+  }, []);
+
+  useEffect(() => {
     // 逐字显现标题
     const titleInterval = setInterval(() => {
       setTitleRevealed((prev) => {

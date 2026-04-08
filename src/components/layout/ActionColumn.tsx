@@ -1,5 +1,6 @@
 // src/components/layout/ActionColumn.tsx
 import { InkButton } from "../ui/InkButton";
+import { getClueTypeLabel } from "../../types/api";
 import type {
   SceneLocation,
   ReachableLocation,
@@ -204,7 +205,7 @@ export function ActionColumn({
                     {clue.name}
                   </div>
                   <div className="text-xs text-(--text-muted)">
-                    {clue.clue_type}
+                    {getClueTypeLabel(clue.clue_type)}
                   </div>
                 </div>
               </div>

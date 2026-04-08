@@ -12,6 +12,7 @@ import type {
   SessionPlayer,
   SessionMap,
   SessionNpc,
+  DialogueDetail,
 } from "../../types/api";
 import type { DiscoveredClue } from "../../hooks/useGameSession";
 
@@ -33,12 +34,15 @@ interface MainStageProps {
   playerProfile: SessionPlayer | null;
   mapData: SessionMap | null;
   npcs?: SessionNpc[];
+  currentDialogue?: DialogueDetail | null;
+  dialogueLoading?: boolean;
   onTalkNpc: (npcKey: string) => void;
   onInvestigate: () => void;
   onMove: (locationKey: string) => void;
   onBackToInvestigation: () => void;
   onFeedbackComplete: () => void;
   onBackFromProfile?: () => void;
+  onSendTalkMessage?: (text: string) => void;
   loading?: boolean;
 }
 
@@ -52,12 +56,15 @@ export function MainStage({
   playerProfile,
   mapData,
   npcs,
+  currentDialogue,
+  dialogueLoading,
   onTalkNpc,
   onInvestigate,
   onMove,
   onBackToInvestigation,
   onFeedbackComplete,
   onBackFromProfile,
+  onSendTalkMessage,
   loading,
 }: MainStageProps) {
   const details = scene.details;
@@ -88,9 +95,10 @@ export function MainStage({
         <DialogueView
           activeNpcKey={activeNpcKey}
           visibleNpcs={details.visible_npcs}
-          narrativeText={narrativeText}
-          latestDialogue={details.latest_dialogue}
+          currentDialogue={currentDialogue}
+          dialogueLoading={dialogueLoading}
           onBack={onBackToInvestigation}
+          onSendMessage={onSendTalkMessage}
         />
       )}
 
